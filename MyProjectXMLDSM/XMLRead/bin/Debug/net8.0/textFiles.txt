@@ -1,0 +1,126 @@
+Data for shape with Id 'f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca':
+Type: MM.Dsm.LineBuilding.Views.Diagram.OperationBuilder.Plc.PlcConsistencyThreadShape
+Id: f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
+ZIndex: 1
+Position: 640;124
+IsDraggingEnabled: false
+IsRotationEnabled: false
+Content: Consistency
+Size: 110;226
+RotationAngle: 0
+MinWidth: 15
+MinHeight: 15
+MaxWidth: INF
+MaxHeight: INF
+UseDefaultConnectors: True
+RestoredHeight: 0
+RestoredMinHeight: 0
+RestoredIsResizingEnabled: false
+ContainerPosition: 0
+ThreadName: Consistency
+ACKDatablock: 2002
+ACKByte: 70
+ACKBit: 0
+REQDatablock: 2002
+REQByte: 52
+REQBit: 0
+DMCDatablock: 1002
+DMCStartByte: 0
+DMCLenght: 50
+ModelDatablock: 2002
+ModelByte: 54
+OutModelDatablock: 0
+OutModelByte: 0
+WOKDatablock: 1002
+WOKByte: 88
+WOKBit: 0
+WKODatablock: 1002
+WKOByte: 90
+WKOBit: 0
+WorkResultDatablock: 2002
+WorkResultByte: 72
+AllSteps: <?xml version="1.0" encoding="utf-16"?>
+<AllSteps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Steps>
+    <StepModel>
+      <StepId>2</StepId>
+      <Name>Screw 1</Name>
+      <EFASDatablock>2002</EFASDatablock>
+      <EFASByte>92</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>3</StepId>
+      <Name>Screw 2</Name>
+      <EFASDatablock>2002</EFASDatablock>
+      <EFASByte>93</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>4</StepId>
+      <Name>Screw 3</Name>
+      <EFASDatablock>2002</EFASDatablock>
+      <EFASByte>94</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>5</StepId>
+      <Name>Screw 4</Name>
+      <EFASDatablock>2002</EFASDatablock>
+      <EFASByte>95</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>6</StepId>
+      <Name>Screw 5</Name>
+      <EFASDatablock>2002</EFASDatablock>
+      <EFASByte>96</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>7</StepId>
+      <Name>Screw 6</Name>
+      <EFASDatablock>2002</EFASDatablock>
+      <EFASByte>97</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+  </Steps>
+</AllSteps>
+QN: 0
+Items: 

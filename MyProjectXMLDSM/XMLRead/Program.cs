@@ -1,0 +1,242 @@
+﻿using System;
+using System.Collections;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Xml;
+
+// Atributes OpName
+// List of nodes [shapes]
+
+#region  v01 OK constans
+// class Program
+// {
+//     static void Main(string[] args)
+//     {
+//         // Get the current directory of the executable
+//         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+//         // Combine the directory with the XML file name
+//         string xmlFilePath = System.IO.Path.Combine(currentDirectory, "my.xml");
+
+//         // Load the XML document
+//         XmlDocument doc = new XmlDocument();
+//         doc.Load(xmlFilePath);
+
+//         // Select all PlcConsistencyThreadShape and PlcCongruencyThreadShape elements
+//         XmlNodeList shapes = doc.SelectNodes("//PlcConsistencyThreadShape | //PlcCongruencyThreadShape");
+
+//         // Loop through each shape element
+//         foreach (XmlNode shape in shapes)
+//         {
+//             // Get the value of WKOBit attribute
+//             XmlAttribute wkoBitAttr = shape.Attributes["WKOBit"];
+//             if (wkoBitAttr != null)
+//             {
+//                 string wkoBitValue = wkoBitAttr.Value;
+//                 Console.WriteLine($"WKOBit value for shape with Id '{shape.Attributes["Id"].Value}': {wkoBitValue}");
+//             }
+//         }
+//     }
+// }
+
+#endregion
+
+#region  v02 OK
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Please provide a command-line argument (e.g., WKOBit)");
+            return;
+        }
+
+        string attributeName = args[1]; // Command-line argument, e.g., WKOBit
+        string choseOption = args[0];   // Command-line Argument e.g. [a] or [g]
+
+        Console.WriteLine("OPTIONS: "  + choseOption + " " + attributeName); // DEBUG, to reject of course
+
+        // Get the current directory of the executable
+        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+        // Combine the directory with the XML file name
+        string xmlFilePath = Path.Combine(currentDirectory, "my.xml");
+
+        // Check if the XML file exists
+        if (!File.Exists(xmlFilePath))
+        {
+            Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+            return;
+        }
+
+        // Load the XML document
+        XmlDocument doc = new XmlDocument();
+        doc.Load(xmlFilePath);
+
+        // Select all nodes [XmlNodeList]
+        XmlNodeList shapes = doc.SelectNodes("//OperationShape | //PlcConsistencyThreadShape | //PlcCongruencyThreadShape | //PlcTraceabilityThreadShape");
+
+        switch (choseOption.ToString())
+        {
+            case "g":
+                GetThread();
+                break;
+
+            case "a":
+                GetThreadAll();
+                break;
+
+            default:
+                Console.WriteLine("Not chose ...");
+                break;
+
+        }      
+
+#region  Function
+
+        void GetThreadAll()                                               
+        {
+            // Loop through each shape element (!)
+            foreach (XmlNode shape in shapes)
+            {
+                // Get the value of the specified attribute [XmlAttribute]
+                XmlAttribute attr = shape.Attributes[attributeName];
+
+                if (attr != null)
+                {
+                    string attributeValue = attr.Value;
+                    Console.WriteLine($"{attributeName} value for shape with Id '{shape.Attributes["Id"].Value}': {attributeValue}");
+                    
+                }
+                else
+                {
+                    Console.WriteLine($"Attribute '{attributeName}' not found for shape with Id '{shape.Attributes["Id"].Value}'.");
+                }
+            }
+
+        }
+
+        void GetThread()
+        {
+            // Loop through each shape element (!)
+            foreach (XmlNode shape in shapes)
+            {
+                // Get the value of the specified attribute [XmlAttribute]
+                //XmlAttribute attr = shape.Attributes[attributeName];
+
+                //XmlAttribute attrId = shape.Attributes["Id"];
+                //XmlAttribute attrType = shape.Attributes["Type"];
+
+                List<XmlAttribute> attrList = new List<XmlAttribute>();
+                attrList.Add(shape.Attributes["Id"]);
+                attrList.Add(shape.Attributes["Type"]);
+
+
+                if (attrList != null)
+                {
+                    string attrID_Value = attrList[0].Value;
+                    string attrTYPE_Value = attrList[1].Value;
+                    
+                    //Console.WriteLine($"{attributeName} value for shape with Id '{shape.Attributes["Id"].Value}': {attributeValue}");
+                    
+
+                    //var tmp = SelectedString(attrTYPE_Value);
+                    Console.WriteLine($"Type : {SelectedString(attrTYPE_Value)} IndexId: {attrID_Value}");
+                }
+                else
+                {
+                    Console.WriteLine($"Attribute '{attributeName}' not found for shape with Id '{shape.Attributes["Id"].Value}'.");
+                }
+            }
+            
+
+        }
+
+        string SelectedString(string strN)
+        {
+            string fullString = strN;
+        
+            string[] parts = fullString.Split('.');
+
+            if (fullString.Length < 70)
+            {
+                if (parts.Length > 6)
+                {
+                    string result = parts[6];
+                    return result;
+                }
+            }
+
+            if (fullString.Length > 70)
+            {
+                if(parts.Length > 7)
+                {
+                    string result = parts[7];
+                    return result;
+                }    
+            }
+
+            return $"Invalid string format. {fullString.Length}";
+            
+        }
+
+#endregion
+
+    }
+}
+
+
+#endregion
+
+#region v04 Id
+// class Program
+// {
+//     static void Main(string[] args)
+//     {
+//         if (args.Length == 0)
+//         {
+//             Console.WriteLine("Please provide a shape Id as a command-line argument.");
+//             return;
+//         }
+
+//         string shapeId = args[0]; // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
+
+//         // Get the current directory of the executable
+//         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+//         // Combine the directory with the XML file name
+//         string xmlFilePath = Path.Combine(currentDirectory, "my.xml");
+
+//         // Check if the XML file exists
+//         if (!File.Exists(xmlFilePath))
+//         {
+//             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+//             return;
+//         }
+
+//         // Load the XML document
+//         XmlDocument doc = new XmlDocument();
+//         doc.Load(xmlFilePath);
+
+//         // Select the shape element with the specified Id
+//         XmlNode shapeNode = doc.SelectSingleNode($"//*[(@Id = '{shapeId}')]");
+
+//         // Check if shape with given Id exists
+//         if (shapeNode == null)
+//         {
+//             Console.WriteLine($"Shape with Id '{shapeId}' not found in the XML file.");
+//             return;
+//         }
+
+//         // Print all attributes and their values for the shape
+//         Console.WriteLine($"Data for shape with Id '{shapeId}':");
+
+//         foreach (XmlAttribute attr in shapeNode.Attributes)
+//         {
+//             Console.WriteLine($"{attr.Name}: {attr.Value}");
+//         }
+//     }
+// }
+#endregion
