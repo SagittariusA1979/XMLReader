@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
@@ -169,14 +170,6 @@ using System.Xml.Linq;
 //             {
 //                 Console.WriteLine($"Error: {ex}");
 //             }
-
-
-
-
-
-            
-            
-
 //         }
 
 //         string SelectedString(string strN)
@@ -268,51 +261,81 @@ using System.Xml.Linq;
 #endregion
 
 #region LinQ
-// class Program
-// {
-//     static void Main(string[] args)
-//     {
-//         if (args.Length == 0)
-//         {
-//             Console.WriteLine("Please provide a shape Id as a command-line argument.");
-//             return;
-//         }
+public class StepModel              // OpInfo OPxxx <Struct of XML for StepModel>
+{
+    public int StepId { get; set; }
+    public string Name { get; set; }
+    public int EFASDatablock { get; set; }
+    public int EFASByte { get; set; }
+    public int ESTRCDatablock { get; set; }
+    public int ESTRCByte { get; set; }
+    public int DateTimeDatablock { get; set; }
+    public int DateTimeStartByte { get; set; }
+    public string SelectedDateTimeType { get; set; }
+    // Add other properties as needed
+}
 
-//         string shapeId = args[0]; // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
-//         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-//         string xmlFilePath = Path.Combine(currentDirectory, "my.xml");       
-//         if (!File.Exists(xmlFilePath))
-//         {
-//             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
-//             return;
-//         }
+public class VariableModel          // OpInfo OPxxx <Struct of XML for StepModel>
+{
+    public int VariableId { get; set; }
+    public string Name { get; set; }
+}
+class Program
+{
+    static void Main(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Please provide a shape Id as a command-line argument.");
+            return;
+        }
 
-//         // Load the XML document
-//         XDocument doc = XDocument.Load(xmlFilePath);
+        string shapeId = args[0]; // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
+        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string xmlFilePath = Path.Combine(currentDirectory, "my.xml");       
+        if (!File.Exists(xmlFilePath))
+        {
+            Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+            return;
+        }
 
-//         // Select the shape element with the specified Id
-//         XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);
+        
+        XDocument doc = XDocument.Load(xmlFilePath);                                                            // Load the XML document
+        XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);    // Select the shape element with the specified Id
 
-//         // Check if shape with given Id exists
-//         if (shapeElement == null)
-//         {
-//             Console.WriteLine($"Shape with Id '{shapeId}' not found in the XML file.");
-//             return;
-//         }
+        if (shapeElement == null)                                                                                // Check if shape with given Id exists
+        {
+            Console.WriteLine($"Shape with Id '{shapeId}' not found in the XML file.");
+            return;
+        }
 
-//         // Print all attributes and their values for the shape
-//         Console.WriteLine($"Data for shape with Id '{shapeId}':");
+        // Print all attributes and their values for the shape
+        Console.WriteLine($"Data for shape with Id '{shapeId}':");
 
-//         foreach (var attr in shapeElement.Attributes())
-//         {
-//             Console.WriteLine($"{attr.Name}: {attr.Value}");
-//         }
-//     }
-// }
+        foreach (var attr in shapeElement.Attributes())
+        {
+            // Console.WriteLine($"{attr.Name}: {attr.Value}");
+            Console.WriteLine($"{attr.Name}:");
+
+
+            // if (attr.Name == "Type")
+            // {
+            //     Console.WriteLine($"TYPE: {attr.Value}");
+            //     break;
+            // }
+
+            // if(attr.Name == "EFASDatablock")
+            // {
+            //     Console.WriteLine($"#{attr.Name}: {attr.Value}");
+            // }
+            
+        }
+    }
+}
 
 #endregion
 
-#region gread Linq
+#region gread Linq --> to delete, the same sytuation as below
 
 // class Program
 // {
@@ -375,66 +398,66 @@ using System.Xml.Linq;
 
 #endregion
 
-#region gread Linq
+#region gread Linq --> to delete becouse this approach is wrong
 
-class Program
-{
-    static void Main(string[] args)
-    {
-        if (args.Length == 0)
-        {
-            Console.WriteLine("Please provide a StepId as a command-line argument.");
-            return;
-        }
+// class Program
+// {
+//     static void Main(string[] args)
+//     {
+//         if (args.Length == 0)
+//         {
+//             Console.WriteLine("Please provide a StepId as a command-line argument.");
+//             return;
+//         }
 
-        string stepId = args[0];
+//         string stepId = args[0];
 
-        try
-        {
-            string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string xmlFilePath = Path.Combine(currentDirectory, "my.xml");
+//         try
+//         {
+//             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+//             string xmlFilePath = Path.Combine(currentDirectory, "my.xml");
 
-            if (!File.Exists(xmlFilePath))
-            {
-                Console.WriteLine($"XML file '{xmlFilePath}' not found.");
-                return;
-            }
+//             if (!File.Exists(xmlFilePath))
+//             {
+//                 Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+//                 return;
+//             }
 
-            XDocument doc = XDocument.Load(xmlFilePath);
+//             XDocument doc = XDocument.Load(xmlFilePath);
 
-            // Ensure StepId is checked as a string, as XML values are often strings
-            XElement stepElement = doc.Descendants("StepModel").FirstOrDefault(e => (string)e.Element("StepId") == stepId);
+//             // Ensure StepId is checked as a string, as XML values are often strings
+//             XElement stepElement = doc.Descendants("StepModel").FirstOrDefault(e => (string)e.Element("StepId") == stepId);
 
-            if (stepElement == null)
-            {
-                Console.WriteLine($"Step with StepId '{stepId}' not found in the XML file.");
-                return;
-            }
+//             if (stepElement == null)
+//             {
+//                 Console.WriteLine($"Step with StepId '{stepId}' not found in the XML file.");
+//                 return;
+//             }
 
-            XElement efasDatablockElement = stepElement.Element("EFASDatablock");
+//             XElement efasDatablockElement = stepElement.Element("EFASDatablock");
 
-            if (efasDatablockElement != null)
-            {
-                Console.WriteLine($"EFASDatablock for StepId '{stepId}': {efasDatablockElement.Value}");
-            }
-            else
-            {
-                Console.WriteLine($"EFASDatablock element not found for StepId '{stepId}'.");
-            }
-        }
-        catch (FileNotFoundException ex)
-        {
-            Console.WriteLine($"File not found: {ex.Message}");
-        }
-        catch (XmlException ex)
-        {
-            Console.WriteLine($"XML error: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
-    }
-}
+//             if (efasDatablockElement != null)
+//             {
+//                 Console.WriteLine($"EFASDatablock for StepId '{stepId}': {efasDatablockElement.Value}");
+//             }
+//             else
+//             {
+//                 Console.WriteLine($"EFASDatablock element not found for StepId '{stepId}'.");
+//             }
+//         }
+//         catch (FileNotFoundException ex)
+//         {
+//             Console.WriteLine($"File not found: {ex.Message}");
+//         }
+//         catch (XmlException ex)
+//         {
+//             Console.WriteLine($"XML error: {ex.Message}");
+//         }
+//         catch (Exception ex)
+//         {
+//             Console.WriteLine($"An error occurred: {ex.Message}");
+//         }
+//     }
+// }
 
 #endregion
