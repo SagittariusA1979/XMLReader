@@ -302,6 +302,24 @@ class Program
         
         XDocument doc = XDocument.Load(xmlFilePath);                                                            // Load the XML document
         XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);    // Select the shape element with the specified Id
+        
+        #region  Convert
+        // request for converter files
+        //XElement shapeElement = doc.Descendants("StepModel").FirstOrDefault(e => (string)e.Element("StepId") == shapeId);
+
+        // if (shapeElement != null)
+        // {
+        //     // Access EFASDatablock value
+        //     string efasDatablockValue = (string)shapeElement.Element("EFASDatablock");
+
+        //     // Print the value
+        //     Console.WriteLine($"EFASDatablock value: {efasDatablockValue}");
+        // }
+        // else
+        // {
+        //     Console.WriteLine("Shape element not found.");
+        // }
+        #endregion
 
         if (shapeElement == null)                                                                                // Check if shape with given Id exists
         {
@@ -312,24 +330,40 @@ class Program
         // Print all attributes and their values for the shape
         Console.WriteLine($"Data for shape with Id '{shapeId}':");
 
-        foreach (var attr in shapeElement.Attributes())
+        WriteDataToFile(shapeElement, "0ae629f6df3b.xml");
+        Console.WriteLine("Data has been written to the file.");
+
+        // foreach (var attr in shapeElement.Attributes())
+        // {
+        //     // if (attr.Name == "OpName") // I can show all data or specific data. How this case
+        //     // { 
+        //     //      Console.WriteLine($"{attr.Name}:{attr.Value}");
+        //     // }
+        //     Console.WriteLine($"{attr.Name}:{attr.Value}");
+        // }
+
+        #region Function
+
+        static void WriteDataToFile(XElement shapeElement, string NameOfFiles)
         {
-            // Console.WriteLine($"{attr.Name}: {attr.Value}");
-            Console.WriteLine($"{attr.Name}:");
+            // Get the directory where the executable is located
+            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-
-            // if (attr.Name == "Type")
-            // {
-            //     Console.WriteLine($"TYPE: {attr.Value}");
-            //     break;
-            // }
-
-            // if(attr.Name == "EFASDatablock")
-            // {
-            //     Console.WriteLine($"#{attr.Name}: {attr.Value}");
-            // }
+            // Combine the directory with the file name
+            string filePath = Path.Combine(exeDirectory, NameOfFiles);
             
+            // Open a StreamWriter to append or create the file
+            using (StreamWriter writer = new StreamWriter(filePath, true))
+            {
+                foreach (var attr in shapeElement.Attributes())
+                {
+                    writer.WriteLine($"{attr.Name}:{attr.Value}");
+                }
+            }
         }
+        
+        #endregion
+        
     }
 }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("XMLRead")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+87e244462b8260cc8096c5982e71d41e875b403b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6fba19a153662d1f4ee85249743341c7ed20cce8")]
 [assembly: System.Reflection.AssemblyProductAttribute("XMLRead")]
 [assembly: System.Reflection.AssemblyTitleAttribute("XMLRead")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
