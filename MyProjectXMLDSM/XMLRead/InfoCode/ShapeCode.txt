@@ -1,0 +1,9 @@
+OperationBuilderDiagram:    Id 8e3a5418-2e8b-49cf-9863-53c4d7d73ffd
+
+OperationShape:             Id 98dc2b41-4f29-4bb6-a065-7dae31a1f7f8
+PlcCongruencyThreadShape:   Id f46b3f36-085f-430e-a041-bb9b66d36a9c
+PlcCongruencyThreadShape:   Id 15000c62-c116-4e3a-a97a-99970c6c8d01
+PlcTraceabilityThreadShape: Id b38e06ff-7fac-42ee-acfa-ec5a6f2a5e30
+PlcConsistencyThreadShape:  Id 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260
+
+
