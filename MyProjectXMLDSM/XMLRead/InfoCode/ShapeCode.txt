@@ -7,3 +7,296 @@ PlcTraceabilityThreadShape: Id b38e06ff-7fac-42ee-acfa-ec5a6f2a5e30
 PlcConsistencyThreadShape:  Id 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260
 
 
+========================== Data for OPE -- > ==================================
+
+OpName: OP700
+OpDescription: OP700_Asembly
+SelectedChannelType: Plc
+InnerXml: 
+OperationPosition: 0
+AllSteps: <?xml version="1.0" encoding="utf-16"?>
+<AllSteps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Steps>
+    <StepModel>
+      <StepId>1</StepId>
+      <Name>Step01</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>2</StepId>
+      <Name>Step02</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>3</StepId>
+      <Name>Step03</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>4</StepId>
+      <Name>Step04</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>5</StepId>
+      <Name>Step05</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>6</StepId>
+      <Name>Step01Pcb</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+    <StepModel>
+      <StepId>12</StepId>
+      <Name>Step02Pcb</Name>
+      <EFASDatablock>0</EFASDatablock>
+      <EFASByte>0</EFASByte>
+      <ESTRCDatablock>0</ESTRCDatablock>
+      <ESTRCByte>0</ESTRCByte>
+      <DateTimeDatablock>0</DateTimeDatablock>
+      <DateTimeStartByte>0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+    </StepModel>
+  </Steps>
+</AllSteps>
+AllVariables: <?xml version="1.0" encoding="utf-16"?>
+<AllVariables xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Variables>
+    <VariableModel>
+      <VariableId>1</VariableId>
+      <Name>Result</Name>
+    </VariableModel>
+    <VariableModel>
+      <VariableId>2</VariableId>
+      <Name>Torque</Name>
+    </VariableModel>
+  </Variables>
+</AllVariables>
+AllComponents: <?xml version="1.0" encoding="utf-16"?>
+<AllComponents xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Components>
+    <ComponentModel>
+      <ComponentId>1</ComponentId>
+      <Name>PCB_x</Name>
+    </ComponentModel>
+    <ComponentModel>
+      <ComponentId>3</ComponentId>
+      <Name>PCB_z</Name>
+    </ComponentModel>
+  </Components>
+</AllComponents>
+QN: 0
+
+========================== Data for CSC -- > ==================================
+
+ThreadName:         CSC_OP700
+
+ACKDatablock:       1002
+ACKByte:            70
+ACKBit:             0
+
+REQDatablock:       1002
+REQByte:            52
+REQBit:             0
+
+DMCDatablock:       1002
+DMCStartByte:       0
+DMCLenght:          50
+
+ModelDatablock:     1002
+ModelByte:          54
+
+OutModelDatablock:  0
+OutModelByte:       0
+
+WOKDatablock:       1002
+WOKByte:            88
+WOKBit:             0
+
+WKODatablock:       1002
+WKOByte:            90
+WKOBit:             0
+
+WorkResultDatablock: 1002
+WorkResultByte:      72
+------------------------------------------------------------
+<StepModel>
+      <StepId>                  1</StepId>
+      <Name>                    Step01</Name>
+
+      <EFASDatablock>           1002</EFASDatablock>
+      <EFASByte>                92</EFASByte>
+
+      <ESTRCDatablock>          0</ESTRCDatablock>
+      <ESTRCByte>               0</ESTRCByte>
+
+      <DateTimeDatablock>       0</DateTimeDatablock>
+      <DateTimeStartByte>       0</DateTimeStartByte>
+
+      <SelectedDateTimeType>    S5Time</SelectedDateTimeType>
+      <StepRefs />
+      <CompRefs />
+</StepModel>
+========================== Data for CRC -- > ==================================
+
+ThreadName:             CRC_PCBx_OP700
+ACKDatablock:           1004
+ACKByte:                0
+ACKBit:                 1
+
+REQDatablock:           1004
+REQByte:                0
+REQBit:                 0
+
+ModelDatablock:         1004
+ModelByte:              1
+
+COKDatablock:           1004
+COKByte:                0
+
+COKBit:                 2
+CKODatablock:           1004
+
+CKOByte:                0
+CKOBit:                 3
+
+WorkResultDatablock:    1004
+WorkResultByte:         2
+
+COMPCDatablock:         1004
+COMPCStartByte:         3
+COMPCLenght:            50
+
+QN:                     0
+========================== Data for TRC -- > ==================================
+
+ThreadName: TRC_OP700
+ACKDatablock: 1003
+ACKByte: 230
+ACKBit: 0
+
+REQDatablock: 1003
+REQByte: 228
+REQBit: 0
+
+DMCDatablock: 1003
+DMCStartByte: 0
+DMCLenght: 50
+
+ModelCodeDatablock: 1003
+ModelCodeByte: 52
+
+BoxCodeDatablock: 0
+BoxCodeStartByte: 0
+BoxCodeLenght: 0
+
+GroupCodeDatablock: 0
+GroupCodeStartByte: 0
+GroupCodeLenght: 0
+
+InDateTimeDatablock: 1003
+InDateTimeStartByte: 164
+InDateTimeType: DTL
+
+OutDateTimeDatablock: 1003
+OutDateTimeStartByte: 152
+OutDateTimeType: DTL
+
+ScrapCodeDatablock: 0
+ScrapCodeByte: 0
+
+WorkerCodeDatablock: 0
+WorkerCodeStartByte: 0
+WorkerCodeLenght: 0
+------------------------------------------------------------
+<StepModel>
+      <StepId>              1</StepId>
+      <Name>                Step01</Name>
+
+      <EFASDatablock>       0</EFASDatablock>
+      <EFASByte>            0</EFASByte>
+
+      <ESTRCDatablock>      1003</ESTRCDatablock>
+      <ESTRCByte>           68</ESTRCByte>
+
+      <DateTimeDatablock>   0</DateTimeDatablock>
+      <DateTimeStartByte>   0</DateTimeStartByte>
+      <SelectedDateTimeType>S5Time</SelectedDateTimeType>
+
+      <StepRefs>
+        <StepReferenceModel>
+          <StepRef>         2</StepRef>
+          <StepId>          1</StepId>
+          <VariableId>      2</VariableId>
+
+          <VariableDesc>    Torque</VariableDesc>
+
+          <SelectedValueType>Real</SelectedValueType>
+
+          <TRCDatablock>    1003</TRCDatablock>
+          <TRCStartAddress> 232</TRCStartAddress>
+          <TRCLenght>       4</TRCLenght>
+
+          <MinDatablock>    1010</MinDatablock>
+          <MinStartAddress> 0</MinStartAddress>
+
+          <MaxDatablock>    1011</MaxDatablock>
+          <MaxStartAddress> 0</MaxStartAddress>
+
+          <IsReadOnly>      false</IsReadOnly>
+        </StepReferenceModel>
+      </StepRefs>
+      <CompRefs />
+    </StepModel>
+============================================================

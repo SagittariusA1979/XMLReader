@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = XMLRead
-build_property.ProjectDir = C:\Users\marelli\Desktop\DeskTop\vs\Designe\C#\MyProjectXMLDSMgit\MyProjectXMLDSM\XMLRead\
+build_property.ProjectDir = D:\ProjectOfTraceability\MyProjectXMLDSM\XMLReader\MyProjectXMLDSM\XMLRead\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

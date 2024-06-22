@@ -10,7 +10,7 @@ using System.Xml.Linq;
 // Atributes OpName
 // List of nodes [shapes]
 
-#region  v01 OK constans
+#region v01 OK constans
 // class Program
 // {
 //     static void Main(string[] args)
@@ -44,7 +44,7 @@ using System.Xml.Linq;
 
 #endregion
 
-#region  v02 OK
+#region v02 OK I use DOM API
 
 // class Program
 // {
@@ -56,17 +56,14 @@ using System.Xml.Linq;
 //             return;
 //         }
 
-//         string attributeName = args[1]; // Command-line argument, e.g., WKOBit
-//         string choseOption = args[0];   // Command-line Argument e.g. [a] or [g]
+//         string attributeName = args[1]; // Command-line argument, e.g., WKOBit    -->The secound atribut is important only for function GetThreadAll [ivoke: "a"]
+//         string choseOption = args[0];   // Command-line Argument e.g. [a] or [g]  --> In this case We use only a one parameter [ivoke: "g"]
 
-//         // CSC -> 9b8e4076-1a9d-4d27-83a5-5c4cac85e048
-//         // TRC -> 2e455e7c-7dcc-4d02-8294-921226e19e22
-
-//         string shapeId = "9023de9b-953a-4649-95f9-0ae629f6df3b";                // DEBUG, to reject of course
-
+//         string shapeId = "9023de9b-953a-4649-95f9-0ae629f6df3b";                // DEBUG, to reject of course --> never use !!!
 //         Console.WriteLine("OPTIONS: "  + choseOption + " " + attributeName);    // DEBUG, to reject of course
+
 //         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;        // Get the current directory of the executable
-//         string xmlFilePath = Path.Combine(currentDirectory, "my.xml");          // Combine the directory with the XML file name      
+//         string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");         // Combine the directory with the XML file name      
 //         if (!File.Exists(xmlFilePath))                                          // Check if the XML file exists
 //         {
 //             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
@@ -83,11 +80,12 @@ using System.Xml.Linq;
 //         // XmlNodeList shapes = doc.SelectNodes("//OperationShape | //PlcConsistencyThreadShape | //PlcCongruencyThreadShape | //PlcTraceabilityThreadShape");  // DOM API
 //         // XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);                                                 // LinQ
         
+//         List<string> askThread = new List<string>();
 
 //         switch (choseOption.ToString())
 //         {
 //             case "g":
-//                 GetThread();
+//                 askThread = GetThread("OPE");
 //                 break;
 
 //             case "a":
@@ -98,11 +96,13 @@ using System.Xml.Linq;
 //                 Console.WriteLine("Not chose ...");
 //                 break;
 
-//         }      
+//         }     
+
+//         Console.WriteLine($"{askThread[0]}"); 
 
 // #region  Function
 
-//         void GetThreadAll()                                               
+//         void GetThreadAll()                 // This function looking for in all threads and return value for a e.g. [WKOBit]                                              
 //         {          
 //             try
 //             {
@@ -132,13 +132,47 @@ using System.Xml.Linq;
 //             }          
 //         }
 
-//         void GetThread()
+//         List<string> GetThread(string nameOfShate)                    // This function return [Type] and [Id} for fit threade CSC CRC TRC
 //         {
+//             string choseThread = "OPE";
+            
 //             try
 //             {
-//                 XmlNodeList shapes = doc.SelectNodes("//OperationShape | //PlcConsistencyThreadShape | //PlcCongruencyThreadShape | //PlcTraceabilityThreadShape");
+//                 XmlNodeList shapes_All = doc.SelectNodes("//OperationShape | //PlcConsistencyThreadShape | //PlcCongruencyThreadShape | //PlcTraceabilityThreadShape");
+//                 XmlNodeList shape_OPE = doc.SelectNodes("//OperationShape");
+//                 XmlNodeList shape_CSC = doc.SelectNodes("//PlcConsistencyThreadShape");
+//                 XmlNodeList shape_CRCn = doc.SelectNodes("//PlcCongruencyThreadShape");
+//                 XmlNodeList shape_TRC = doc.SelectNodes("//PlcTraceabilityThreadShape");
 
-//                 foreach (XmlNode shape in shapes)
+//                 List<string> returnThread = new List<string>();
+//                 XmlNodeList shapeCurrent = null;
+
+
+//                 switch (choseThread)                            // This please we chose threads e.g. CSC CRC TRC or OPE
+//                 {
+//                     case "OPE":
+//                         Console.WriteLine("OPE");               // DEBUG (!)
+//                         shapeCurrent = shape_OPE;
+//                         break;
+
+//                     case "CSC":
+//                         Console.WriteLine("CSC");               // DEBUG (!)
+//                         shapeCurrent = shape_CSC;
+//                         break;
+                    
+//                     case "CRC":
+//                         Console.WriteLine("CRC");               // DEBUG (!)
+//                         shapeCurrent = shape_CRCn;
+//                         break;
+
+//                     case "TRC":
+//                         Console.WriteLine("TRC");               // DEBUG (!)
+//                         shapeCurrent = shape_TRC;
+//                         break;
+//                 }
+                
+
+//                 foreach (XmlNode shape in shapeCurrent)
 //                 {
 //                     #region Descryption
 //                     // Get the value of the specified attribute [XmlAttribute]
@@ -158,17 +192,22 @@ using System.Xml.Linq;
 //                         string attrTYPE_Value = attrList[1].Value;
                         
 //                         //Console.WriteLine($"{attributeName} value for shape with Id '{shape.Attributes["Id"].Value}': {attributeValue}");
-//                         Console.WriteLine($"Type : {SelectedString(attrTYPE_Value)} IndexId: {attrID_Value}");
+//                         //Console.WriteLine($"Type : {SelectedString(attrTYPE_Value)} IndexId: {attrID_Value}");
+//                         //Console.WriteLine($"OPE # {attrID_Value}");
+//                         returnThread.Add(attrID_Value);
+                        
 //                     }
 //                     else
 //                     {
 //                         Console.WriteLine($"Attribute '{attributeName}' not found for shape with Id '{shape.Attributes["Id"].Value}'.");
 //                     }
 //                 }
+//                 return returnThread;
 //             }
 //             catch (Exception ex)
 //             {
 //                 Console.WriteLine($"Error: {ex}");
+//                 return new List<string>();
 //             }
 //         }
 
@@ -208,7 +247,210 @@ using System.Xml.Linq;
 
 #endregion
 
-#region v04 Id
+#region V03 OK I use LinQ [to use...]
+
+// class Program
+// {
+//     static void Main(string[] args)
+//     {
+//         if (args.Length < 2)
+//         {
+//             Console.WriteLine("Please provide command-line arguments (e.g., [first] [secound])");
+//             Console.WriteLine("[a] | [Id Content ThreadName ACKByte ect.]");
+//             Console.WriteLine("[g] | [OPE CSC CRC TRC]");
+//             return;
+//         }
+
+//         string choseOption = args[0]; // Command-line argument, e.g., g or a
+//         string attributeName = args[1]; // Command-line argument, e.g., WKOBit
+
+//         Console.WriteLine("OPTIONS: " + choseOption + " " + attributeName);         // DEBUG, to reject of course
+
+//         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;            // Get the current directory of the executable
+//         string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");             // Combine the directory with the XML file name
+
+//         if (!File.Exists(xmlFilePath))                                              // Check if the XML file exists
+//         {
+//             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+//             return;
+//         }
+
+//         XDocument doc = XDocument.Load(xmlFilePath);                                // Load the XML document using LINQ
+
+//         List<string> askThread = new List<string>();
+
+//         switch (choseOption.ToString())                                             // I use a first argument from command line 
+//         {
+//             case "g":
+//                 askThread = GetThread(doc, attributeName);
+//                 break;
+
+//             case "a":
+//                 GetThreadAll(doc, attributeName);
+//                 break;
+
+//             default:
+//                 Console.WriteLine("Not chose ...");
+//                 break;
+//         }
+
+//         if (askThread.Count > 0)                                                    // I check the value of askThread [when is not  0 I show it ]
+//         {
+//             //Console.WriteLine($"{askThread[0]}");
+//             int numberOfId = askThread.Count;
+             
+//              for(var i = 0; i < numberOfId;)
+//              {
+//                 Console.WriteLine($"{i}:{askThread[i]}");
+//                 i++;
+//              }
+//         }
+//     }
+
+//     #region  Functions
+//     static void GetThreadAll(XDocument doc, string attributeName)                   // This function looks for all threads and returns values for a e.g. [WKOBit]
+//     {
+//         try
+//         {
+//             var shapes = doc.Descendants().Where(e => e.Name.LocalName == "OperationShape" ||
+//                                                       e.Name.LocalName == "PlcConsistencyThreadShape" ||
+//                                                       e.Name.LocalName == "PlcCongruencyThreadShape" ||
+//                                                       e.Name.LocalName == "PlcTraceabilityThreadShape");
+
+//             foreach (var shape in shapes)
+//             {
+//                 var attr = shape.Attribute(attributeName);
+
+//                 if (attr != null)
+//                 {
+//                     string attributeValue = attr.Value;
+//                     Console.WriteLine($"{attributeName} value for shape with Id '{shape.Attribute("Id")?.Value}': {attributeValue}");
+//                 }
+//                 else
+//                 {
+//                     Console.WriteLine($"Attribute '{attributeName}' not found for shape with Id '{shape.Attribute("Id")?.Value}'.");
+//                 }
+//             }
+//         }
+//         catch (Exception ex)
+//         {
+//             Console.WriteLine($"Error: {ex}");
+//         }
+//     }
+
+//     static List<string> GetThread(XDocument doc, string nameOfShape)                // This function returns [Type] and [Id] for the selected thread
+//     {
+//         try
+//         {
+//             var shapes_All = doc.Descendants().Where(e => e.Name.LocalName == "OperationShape" ||
+//                                                           e.Name.LocalName == "PlcConsistencyThreadShape" ||
+//                                                           e.Name.LocalName == "PlcCongruencyThreadShape" ||
+//                                                           e.Name.LocalName == "PlcTraceabilityThreadShape");
+
+//             IEnumerable<XElement> shapeCurrent = null;
+
+//             switch (nameOfShape) // Choose threads based on parameter
+//             {
+//                 case "OPE":
+//                     shapeCurrent = shapes_All.Where(e => e.Name.LocalName == "OperationShape");
+//                     break;
+
+//                 case "CSC":
+//                     shapeCurrent = shapes_All.Where(e => e.Name.LocalName == "PlcConsistencyThreadShape");
+//                     break;
+
+//                 case "CRC":
+//                     shapeCurrent = shapes_All.Where(e => e.Name.LocalName == "PlcCongruencyThreadShape");
+//                     break;
+
+//                 case "TRC":
+//                     shapeCurrent = shapes_All.Where(e => e.Name.LocalName == "PlcTraceabilityThreadShape");
+//                     break;
+
+//                 default:
+//                     throw new ArgumentException("Invalid thread name");
+//             }
+
+//             List<string> returnThread = new List<string>();
+
+//             if (shapeCurrent != null)
+//             {
+//                 foreach (var shape in shapeCurrent)
+//                 {
+//                     var attrId = shape.Attribute("Id");
+//                     var attrType = shape.Attribute("Type");
+//                     var attrContent = shape.Attribute("Content");
+
+//                     if (attrId != null && attrType != null && attrContent != null)
+//                     {
+//                         string attrID_Value = attrId.Value;
+//                         string attrTYPE_Value = attrType.Value;
+//                         string attrCONTENT_Value = attrContent.Value;
+    
+//                         //returnThread.Add($"Type: {attrTYPE_Value}, Id: {attrID_Value}");
+                        
+//                         if(nameOfShape == "CRC")
+//                         {
+//                             returnThread.Add($"{attrCONTENT_Value} . {attrID_Value}");
+
+//                         }
+//                         else
+//                         {
+//                             returnThread.Add($"{attrID_Value}");
+//                         }
+//                     }
+//                     else
+//                     {
+//                         Console.WriteLine($"Shape with missing attributes. Id: {shape.Attribute("Id")?.Value}");
+//                     }
+//                 }
+//             }
+//             else
+//             {
+//                 Console.WriteLine($"No shapes found for thread: {nameOfShape}");
+//             }
+
+//             return returnThread;
+//         }
+//         catch (Exception ex)
+//         {
+//             Console.WriteLine($"Error: {ex}");
+//             return new List<string>(); // Return an empty list in case of an error
+//         }
+//     }
+
+//     static string SelectedString(string strN)
+//     {
+//         string fullString = strN;
+
+//         string[] parts = fullString.Split('.');
+
+//         if (fullString.Length < 70)
+//         {
+//             if (parts.Length > 6)
+//             {
+//                 string result = parts[6];
+//                 return result;
+//             }
+//         }
+
+//         if (fullString.Length > 70)
+//         {
+//             if (parts.Length > 7)
+//             {
+//                 string result = parts[7];
+//                 return result;
+//             }
+//         }
+
+//         return $"Invalid string format. {fullString.Length}";
+//     }
+//     #endregion
+// }
+
+#endregion
+
+#region Id version for DOM 
 // class Program
 // {
 //     static void Main(string[] args)
@@ -225,7 +467,7 @@ using System.Xml.Linq;
 //         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
 //         // Combine the directory with the XML file name
-//         string xmlFilePath = Path.Combine(currentDirectory, "my.xml");
+//         string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");
 
 //         // Check if the XML file exists
 //         if (!File.Exists(xmlFilePath))
@@ -260,7 +502,78 @@ using System.Xml.Linq;
 // }
 #endregion
 
-#region LinQ
+#region Id version for LinQ whit make a files for Thread SCS CRC TRC OPE [to use...]
+
+// class Program
+// {
+//     static void Main(string[] args)
+//     {
+//         if (args.Length == 0)
+//         {
+//             Console.WriteLine("Please provide a shape Id as a command-line argument e.g:[3c90b0d0-09ec-4f9f-a23e-80ab02d8d260] [name for files *.xml].");
+//             return;
+//         }
+
+//         string shapeId = args[0];                                           // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
+//         string nameFileThread = args[1];                                    // Name of files for Thread e.g. CSC
+
+//         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+//         string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");
+
+//         if (!File.Exists(xmlFilePath))                                      // Check if the XML file exists
+//         {
+//             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+//             return;
+//         }
+
+//         XDocument doc = XDocument.Load(xmlFilePath);
+
+//         // Select the shape element with the specified Id
+//         XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);
+
+//         if (shapeElement == null)                                           // Check if shape with given Id exists
+//         {
+//             Console.WriteLine($"Shape with Id '{shapeId}' not found in the XML file.");
+//             return;
+//         }
+
+//         // Print all attributes and their values for the shape
+//         Console.WriteLine($"Data for shape with Id '{shapeId}':");
+
+//         WriteDataToFile(shapeElement, nameFileThread);
+
+//         foreach (XAttribute attr in shapeElement.Attributes())
+//         {
+//             Console.WriteLine($"{attr.Name}: {attr.Value}");
+            
+//         }
+//     }
+
+//     #region  Function
+//     static void WriteDataToFile(XElement shapeElement, string NameOfFiles) // This function saves data into separate files 
+//     {
+//             // Get the directory where the executable is located
+//             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+//             // Combine the directory with the file name
+//             string filePath = Path.Combine(exeDirectory, NameOfFiles);
+            
+//             // Open a StreamWriter to append or create the file
+//             using (StreamWriter writer = new StreamWriter(filePath, true))
+//             {
+//                 foreach (var attr in shapeElement.Attributes())
+//                 {
+//                     writer.WriteLine($"{attr.Name}:{attr.Value}");
+//                 }
+//             }
+//     }
+    
+//     #endregion
+// }
+
+#endregion
+
+#region LinQ --> 
 public class StepModel              // OpInfo OPxxx <Struct of XML for StepModel>
 {
     public int StepId { get; set; }
@@ -292,7 +605,7 @@ class Program
 
         string shapeId = args[0]; // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        string xmlFilePath = Path.Combine(currentDirectory, "my.xml");       
+        string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");       
         if (!File.Exists(xmlFilePath))
         {
             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
@@ -303,7 +616,7 @@ class Program
         XDocument doc = XDocument.Load(xmlFilePath);                                                            // Load the XML document
         XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);    // Select the shape element with the specified Id
         
-        #region  Convert
+        #region  Convert [I try to show other data fro thread]
         // request for converter files
         //XElement shapeElement = doc.Descendants("StepModel").FirstOrDefault(e => (string)e.Element("StepId") == shapeId);
 
@@ -327,24 +640,22 @@ class Program
             return;
         }
 
-        // Print all attributes and their values for the shape
-        Console.WriteLine($"Data for shape with Id '{shapeId}':");
+        //Console.WriteLine($"Data for shape with Id '{shapeId}':");                                               // Print all attributes and their values for the shape
+        //WriteDataToFile(shapeElement, "0ae629f6df3b.xml");
+        //Console.WriteLine("Data has been written to the file.");
 
-        WriteDataToFile(shapeElement, "0ae629f6df3b.xml");
-        Console.WriteLine("Data has been written to the file.");
-
-        // foreach (var attr in shapeElement.Attributes())
-        // {
-        //     // if (attr.Name == "OpName") // I can show all data or specific data. How this case
-        //     // { 
-        //     //      Console.WriteLine($"{attr.Name}:{attr.Value}");
-        //     // }
-        //     Console.WriteLine($"{attr.Name}:{attr.Value}");
-        // }
+        foreach (var attr in shapeElement.Attributes())
+        {
+            // if (attr.Name == "OpName") // I can show all data or specific data. How this case
+            // { 
+            //      Console.WriteLine($"{attr.Name}:{attr.Value}");
+            // }
+            Console.WriteLine($"{attr.Name}:{attr.Value}");
+        }
 
         #region Function
 
-        static void WriteDataToFile(XElement shapeElement, string NameOfFiles)
+        static void WriteDataToFile(XElement shapeElement, string NameOfFiles) // This function saves data into separate files 
         {
             // Get the directory where the executable is located
             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -360,6 +671,15 @@ class Program
                     writer.WriteLine($"{attr.Name}:{attr.Value}");
                 }
             }
+        }
+
+        static void DivideFiles(string xmlFile) // This function divide files *.xml to separately threads SCS CRC TRC
+        {
+            XDocument FilesToDivide = XDocument.Load(xmlFile);
+
+            //XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);
+
+
         }
         
         #endregion
