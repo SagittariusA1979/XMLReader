@@ -1,4 +1,4 @@
-OperationBuilderDiagram:    Id 8e3a5418-2e8b-49cf-9863-53c4d7d73ffd
+OperationBuilderDiagram:    Id 8e3a5418-2e8b-49cf-9863-53c4d7d73ffd --> We heven't a steps
 
 OperationShape:             Id 98dc2b41-4f29-4bb6-a065-7dae31a1f7f8
 PlcCongruencyThreadShape:   Id f46b3f36-085f-430e-a041-bb9b66d36a9c
@@ -138,56 +138,73 @@ AllComponents: <?xml version="1.0" encoding="utf-16"?>
 </AllComponents>
 QN: 0
 
+
+========================== Data for Keep a Live and Print -- > ================
+
+
 ========================== Data for CSC -- > ==================================
+<note To prepare a CSC thread You must store a data :>
+  
+  Basic communication data      :        List<T> BasicCd (string Id, string SignalName)
+  Extended  communication data  :        List<T> ExtendedCd (string Id, string SignalName)
+  Number of steps of steps      :        int NumberOfSteps (string Id)
 
-ThreadName:         CSC_OP700
+</>
+<note Basic Data>
+  ThreadName:         CSC_OP700
 
-ACKDatablock:       1002
-ACKByte:            70
-ACKBit:             0
+  ACKDatablock:       1002
+  ACKByte:            70
+  ACKBit:             0
 
-REQDatablock:       1002
-REQByte:            52
-REQBit:             0
+  REQDatablock:       1002
+  REQByte:            52
+  REQBit:             0
 
-DMCDatablock:       1002
-DMCStartByte:       0
-DMCLenght:          50
+  DMCDatablock:       1002
+  DMCStartByte:       0
+  DMCLenght:          50
 
-ModelDatablock:     1002
-ModelByte:          54
+  ModelDatablock:     1002
+  ModelByte:          54
 
-OutModelDatablock:  0
-OutModelByte:       0
+  OutModelDatablock:  0
+  OutModelByte:       0
 
-WOKDatablock:       1002
-WOKByte:            88
-WOKBit:             0
+  WOKDatablock:       1002
+  WOKByte:            88
+  WOKBit:             0
 
-WKODatablock:       1002
-WKOByte:            90
-WKOBit:             0
+  WKODatablock:       1002
+  WKOByte:            90
+  WKOBit:             0
 
-WorkResultDatablock: 1002
-WorkResultByte:      72
-------------------------------------------------------------
-<StepModel>
-      <StepId>                  1</StepId>
-      <Name>                    Step01</Name>
+  WorkResultDatablock: 1002
+  WorkResultByte:      72
+</>
 
-      <EFASDatablock>           1002</EFASDatablock>
-      <EFASByte>                92</EFASByte>
+<note: Extended  communication data>
 
-      <ESTRCDatablock>          0</ESTRCDatablock>
-      <ESTRCByte>               0</ESTRCByte>
+  <StepModel>
+        <StepId>                  1</StepId>
+        <Name>                    Step01</Name>
 
-      <DateTimeDatablock>       0</DateTimeDatablock>
-      <DateTimeStartByte>       0</DateTimeStartByte>
+        <EFASDatablock>           1002</EFASDatablock>
+        <EFASByte>                92</EFASByte>
 
-      <SelectedDateTimeType>    S5Time</SelectedDateTimeType>
-      <StepRefs />
-      <CompRefs />
-</StepModel>
+        <ESTRCDatablock>          0</ESTRCDatablock>
+        <ESTRCByte>               0</ESTRCByte>
+
+        <DateTimeDatablock>       0</DateTimeDatablock>
+        <DateTimeStartByte>       0</DateTimeStartByte>
+
+        <SelectedDateTimeType>    S5Time</SelectedDateTimeType>
+        <StepRefs />
+        <CompRefs />
+  </StepModel>
+
+</>
+
 ========================== Data for CRC -- > ==================================
 
 ThreadName:             CRC_PCBx_OP700

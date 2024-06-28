@@ -7,8 +7,84 @@ using System.Xml;
 using System.Linq;
 using System.Xml.Linq;
 
-// Atributes OpName
-// List of nodes [shapes]
+//using CSC;
+using readxmlFile;
+
+
+# region Program
+
+namespace DSMTester
+{
+    public class DSMTester
+    {
+        static void Main(string[] args)
+        {
+            
+        #region Introduction
+
+        if (args.Length < 2)
+         {
+            Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
+            Console.WriteLine("[A] -> [A WKOBit CSC]");
+            Console.WriteLine("[  ]-> []");
+            return;
+        }
+
+        string choseOption = args[0];   // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit CSC]
+        string attributeName = args[1]; // Command-line argument, e.g., WKOBit
+        string nameThread = args[2];    // Command-line argument, e.g., CSC CRC TRC OPE
+        #endregion
+        
+        #region INSTANCEs
+        
+        ReadXML _readXML= new ReadXML("myX.xml");
+        //CSCThread myCSC = new CSCThread();
+        #endregion
+
+
+        List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
+
+        #region  SWITCH
+        switch (choseOption.ToString())
+        {
+            case "A":
+                askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          // This is public Function from class [ReadXML]
+                break;
+
+            // case "a":
+            //     GetThreadAll(doc, attributeName);
+            //     break;
+
+            default:
+                Console.WriteLine("Not chose ...");
+                break;
+        }
+        #endregion
+
+        if (askThread.Count > 0)                                                    // I check function [askThread = _readXML.GetVarInThreadp(attributeName, nameThread);]
+        {
+            //Console.WriteLine($"{askThread[0]}");
+
+            //int numberOfId = askThread.Count;
+            //  for(var i = 0; i < numberOfId;)
+            //  {
+            //     Console.WriteLine($"{i}:{askThread[i]}");
+            //     i++;
+            //  }
+
+            foreach (string _item in askThread)
+            {
+                Console.WriteLine(_item);
+            }
+        }
+
+        }
+    }
+}
+#endregion
+
+
+
 
 #region v01 OK constans
 // class Program
@@ -276,6 +352,8 @@ using System.Xml.Linq;
 //         }
 
 //         XDocument doc = XDocument.Load(xmlFilePath);                                // Load the XML document using LINQ
+
+        
 
 //         List<string> askThread = new List<string>();
 
@@ -574,118 +652,154 @@ using System.Xml.Linq;
 #endregion
 
 #region LinQ --> 
-public class StepModel              // OpInfo OPxxx <Struct of XML for StepModel>
-{
-    public int StepId { get; set; }
-    public string Name { get; set; }
-    public int EFASDatablock { get; set; }
-    public int EFASByte { get; set; }
-    public int ESTRCDatablock { get; set; }
-    public int ESTRCByte { get; set; }
-    public int DateTimeDatablock { get; set; }
-    public int DateTimeStartByte { get; set; }
-    public string SelectedDateTimeType { get; set; }
-    // Add other properties as needed
-}
+// class Program
+// {
+//     static void Main(string[] args)
+//     {
+//         if (args.Length == 0)
+//         {
+//             Console.WriteLine("Please provide a shape Id as a command-line argument.");
+//             return;
+//         }
 
-public class VariableModel          // OpInfo OPxxx <Struct of XML for StepModel>
-{
-    public int VariableId { get; set; }
-    public string Name { get; set; }
-}
-class Program
-{
-    static void Main(string[] args)
-    {
-        if (args.Length == 0)
-        {
-            Console.WriteLine("Please provide a shape Id as a command-line argument.");
-            return;
-        }
+//         string shapeId = args[0];       // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
+//         string childTree = args[1];     // Secound argument e.g. OpName but when you use a AllSteps you get a all childs
 
-        string shapeId = args[0]; // Command-line argument, e.g., f4b9a125-a10b-4e9b-bc92-7ce5ce29c2ca
-        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");       
-        if (!File.Exists(xmlFilePath))
-        {
-            Console.WriteLine($"XML file '{xmlFilePath}' not found.");
-            return;
-        }
 
+//         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+//         string xmlFilePath = Path.Combine(currentDirectory, "myX.xml");       
+//         if (!File.Exists(xmlFilePath))
+//         {
+//             Console.WriteLine($"XML file '{xmlFilePath}' not found.");
+//             return;
+//         }
+
+//         XDocument doc = XDocument.Load(xmlFilePath);                                                                // Load the XML document
+
+
+//         #region  First Request ---[ I get you down specific data  ]-------->
+                                                                      
+//         XElement? shapeElement = doc.Descendants().FirstOrDefault(e => (string?)e.Attribute("Id") == shapeId);    // Select the shape element with the specified Id
         
-        XDocument doc = XDocument.Load(xmlFilePath);                                                            // Load the XML document
-        XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);    // Select the shape element with the specified Id
+//         string? result = doc.Descendants()
+//                         .Where(e => (string?)e.Attribute("Id") == shapeId)
+//                         .Select(e => (string?)e.Attribute(childTree))
+//                         .FirstOrDefault();
+
+//         Console.WriteLine($"{result}");
+//         #endregion
+
+//         #region Secound Request ----------->
+//         XDocument currentResult = XDocument.Parse(result);
         
-        #region  Convert [I try to show other data fro thread]
-        // request for converter files
-        //XElement shapeElement = doc.Descendants("StepModel").FirstOrDefault(e => (string)e.Element("StepId") == shapeId);
+//         var stepModel = currentResult.Descendants("StepModel") // OPE
+//                            .Where(e => (int?)e.Element("StepId") == 1)
+//                            .Select(e => new
+//                            {
+//                                StepId = (int)e.Element("StepId"),
+//                                Name = (string)e.Element("Name"),
+//                                EFASDatablock = (int)e.Element("EFASDatablock"),
+//                                EFASByte = (int)e.Element("EFASByte"),
+//                                ESTRCDatablock = (int?)e.Element("ESTRCDatablock"),
+//                                ESTRCByte = (int?)e.Element("ESTRCByte"),
+//                                DateTimeDatablock = (int?)e.Element("DateTimeDatablock"),
+//                                DateTimeStartByte = (int?)e.Element("DateTimeStartByte"),
+//                                SelectedDateTimeType = (string?)e.Element("SelectedDateTimeType")
+//                                // StepRefs
+//                                // CompRefs
+//                            })
+//                            .FirstOrDefault();
 
-        // if (shapeElement != null)
-        // {
-        //     // Access EFASDatablock value
-        //     string efasDatablockValue = (string)shapeElement.Element("EFASDatablock");
 
-        //     // Print the value
-        //     Console.WriteLine($"EFASDatablock value: {efasDatablockValue}");
-        // }
-        // else
-        // {
-        //     Console.WriteLine("Shape element not found.");
-        // }
-        #endregion
+//             if (stepModel != null)
+//             {
+//                 Console.WriteLine($"StepId: {stepModel.StepId}");
+//                 Console.WriteLine($"Name: {stepModel.Name}");
+//                 Console.WriteLine($"EFASDatablock: {stepModel.EFASDatablock}");
+//                 Console.WriteLine($"EFASByte: {stepModel.EFASByte}");
+//                 Console.WriteLine($"ESTRCDatablock: {stepModel.ESTRCDatablock}");
+//                 Console.WriteLine($"ESTRCByte: {stepModel.ESTRCByte}");
+//                 Console.WriteLine($"DateTimeDatablock: {stepModel.DateTimeDatablock}");
+//                 Console.WriteLine($"DateTimeStartByte: {stepModel.DateTimeStartByte}");
+//                 Console.WriteLine($"SelectedDateTimeType: {stepModel.SelectedDateTimeType}");
+//                 Console.WriteLine($"ESTRCByte: {stepModel.ESTRCByte}");
+//             }
+//             else
+//             {
+//                 Console.WriteLine("Step with StepId = 12 not found.");
+//             }
+//             #endregion
+    
+//         #region  Convert [I try to show other data fro thread]
+//         // request for converter files
+//         //XElement shapeElement = doc.Descendants("StepModel").FirstOrDefault(e => (string)e.Element("StepId") == shapeId);
 
-        if (shapeElement == null)                                                                                // Check if shape with given Id exists
-        {
-            Console.WriteLine($"Shape with Id '{shapeId}' not found in the XML file.");
-            return;
-        }
+//         // if (shapeElement != null)
+//         // {
+//         //     // Access EFASDatablock value
+//         //     string efasDatablockValue = (string)shapeElement.Element("EFASDatablock");
 
-        //Console.WriteLine($"Data for shape with Id '{shapeId}':");                                               // Print all attributes and their values for the shape
-        //WriteDataToFile(shapeElement, "0ae629f6df3b.xml");
-        //Console.WriteLine("Data has been written to the file.");
+//         //     // Print the value
+//         //     Console.WriteLine($"EFASDatablock value: {efasDatablockValue}");
+//         // }
+//         // else
+//         // {
+//         //     Console.WriteLine("Shape element not found.");
+//         // }
+//         #endregion
 
-        foreach (var attr in shapeElement.Attributes())
-        {
-            // if (attr.Name == "OpName") // I can show all data or specific data. How this case
-            // { 
-            //      Console.WriteLine($"{attr.Name}:{attr.Value}");
-            // }
-            Console.WriteLine($"{attr.Name}:{attr.Value}");
-        }
+//         if (shapeElement == null)                                                                                  // Check if shape with given Id exists
+//         {
+//             Console.WriteLine($"Shape with Id '{shapeId}' not found in the XML file.");
+//             return;
+//         }
 
-        #region Function
+//         //Console.WriteLine($"Data for shape with Id '{shapeId}':");                                               // Print all attributes and their values for the shape
+//         //WriteDataToFile(shapeElement, "0ae629f6df3b.xml");
+//         //Console.WriteLine("Data has been written to the file.");
 
-        static void WriteDataToFile(XElement shapeElement, string NameOfFiles) // This function saves data into separate files 
-        {
-            // Get the directory where the executable is located
-            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+//         foreach (var attr in shapeElement.Attributes())
+//         {
+//             // if (attr.Name == "OpName") // I can show all data or specific data. How this case
+//             // { 
+//             //      Console.WriteLine($"{attr.Name}:{attr.Value}");
+//             // }
+//             Console.WriteLine($"{attr.Name}:{attr.Value}");
+//         }
 
-            // Combine the directory with the file name
-            string filePath = Path.Combine(exeDirectory, NameOfFiles);
+//         #region Function
+
+//         static void WriteDataToFile(XElement shapeElement, string NameOfFiles) // This function saves data into separate files 
+//         {
+//             // Get the directory where the executable is located
+//             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+//             // Combine the directory with the file name
+//             string filePath = Path.Combine(exeDirectory, NameOfFiles);
             
-            // Open a StreamWriter to append or create the file
-            using (StreamWriter writer = new StreamWriter(filePath, true))
-            {
-                foreach (var attr in shapeElement.Attributes())
-                {
-                    writer.WriteLine($"{attr.Name}:{attr.Value}");
-                }
-            }
-        }
+//             // Open a StreamWriter to append or create the file
+//             using (StreamWriter writer = new StreamWriter(filePath, true))
+//             {
+//                 foreach (var attr in shapeElement.Attributes())
+//                 {
+//                     writer.WriteLine($"{attr.Name}:{attr.Value}");
+//                 }
+//             }
+//         }
 
-        static void DivideFiles(string xmlFile) // This function divide files *.xml to separately threads SCS CRC TRC
-        {
-            XDocument FilesToDivide = XDocument.Load(xmlFile);
+//         static void DivideFiles(string xmlFile) // This function divide files *.xml to separately threads SCS CRC TRC
+//         {
+//             XDocument FilesToDivide = XDocument.Load(xmlFile);
 
-            //XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);
+//             //XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);
 
 
-        }
+//         }
         
-        #endregion
+//         #endregion
         
-    }
-}
+//     }
+// }
 
 #endregion
 
