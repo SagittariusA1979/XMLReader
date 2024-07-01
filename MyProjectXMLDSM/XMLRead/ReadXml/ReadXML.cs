@@ -86,7 +86,7 @@ namespace readxmlFile
         #region Methods
 
         // PRIVATE INTERFACE
-        private static List<string> GetVarInThread(XDocument doc, string attributeName, string threadName) // This function looks for all threads and returns values for a e.g. [WKOBit]                  
+        private static List<string> GetVarInThread(XDocument doc, string attributeName, string threadName)                              // This function looks for specific thread and returns values for a e.g. [WKOBit]                  
         {
             List<string> list_data = new List<string>();
             try
@@ -103,23 +103,28 @@ namespace readxmlFile
                         string attributeValue = attr.Value;
                         list_data.Add(attributeValue);
 
-                        
+                        #region  This is an example of deep search (Those functions are realized in the next two functions)
                         //------------------------------------->>
-                        if(attributeName == "AllSteps")
-                        {
-                            XDocument xdoc = XDocument.Parse(attributeValue);                           // In this plase I start a new serch for variabels e.g. EFASDatablock
-                            var stepModel = xdoc.Descendants("StepModel").Where(x => (int)x.Element("StepId") == 1).FirstOrDefault();
+                        // if(attributeName == "AllSteps")
+                        // {
+                        //     XDocument xdoc = XDocument.Parse(attributeValue);                           // In this plase I start a new serch for variabels e.g. EFASDatablock
+                        //     var stepModel = xdoc.Descendants("StepModel").Where(x => (int)x.Element("StepId") == 1).FirstOrDefault();
 
-                            if (stepModel != null)
-                            {
-                                var efasDatablock = (int)stepModel.Element("EFASDatablock");
+                        //     if (stepModel != null)
+                        //     {
+                        //         var efasDatablock = (int)stepModel.Element("EFASDatablock");
+
+                        //         // var variableId = stepModel.Descendants("StepReferenceModel")        // for a TRC
+                        //         //       .Select(x => (int)x.Element("VariableId"))
+                        //         //       .FirstOrDefault();
                                 
-                                Console.WriteLine($"EFASDatablock: {efasDatablock}");
-                                Console.WriteLine(stepModel);
+                        //         Console.WriteLine($"EFASDatablock: {efasDatablock}");
+                        //         Console.WriteLine(stepModel);
                                 
-                            }
-                        }
+                        //     }
+                        // }
                         //-------------------------------------<<
+                        #endregion
 
                         //Console.WriteLine($"{attributeName} value for shape with Id '{shape.Attribute("Id")?.Value}': {attributeValue}");
                     }
@@ -138,36 +143,53 @@ namespace readxmlFile
             return list_data;
         }
 
-        public string GetStepElementValueById(int stepId, string elementName)
+        private static List<string> GetVar_1LevelInThread(XDocument doc, string stepId, string attributesName, string  threadName)      // This finction looks for specific thread and StepsId after return values e.g. [EFASDatablock]
         {
-            if (_data == null)
+            List<string> list_data = new List<string>();
+            try
             {
-                Console.WriteLine("XML data not loaded.");
-                return null;
-            }
+                var convString = StrThr(threadName);
+                var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);  // first search for a Thraed
 
-            var step = _data.Descendants("StepModel").FirstOrDefault(s => (int)s.Element("StepId") == stepId);
+                foreach (var shape in shapes)
+                {
+                    var attr = shape.Attribute("AllSteps");                                 // asigne to [attr] variabels for AllSteps 
 
-            if (step != null)
-            {
-                var element = step.Element(elementName);
-                if (element != null)
-                {
-                    return element.Value;
-                }
-                else
-                {
-                    Console.WriteLine($"{elementName} not found for StepId {stepId}.");
-                    return null;
+                    if (attr != null)
+                    {
+                        string attributeValue = attr.Value;
+                        //list_data.Add(attributeValue);
+
+                        XDocument dipdata = XDocument.Parse(attributeValue);                // second dip search in  variables of AllSteps
+                        var stepModel = dipdata.Descendants("StepModel").Where(e => (string)e.Element("StepId") == stepId).FirstOrDefault();
+
+                        if(stepModel != null)
+                            {
+                                string dipElement = (string)stepModel.Element(attributesName);
+                                list_data.Add(dipElement);
+                                //Console.WriteLine(dipElement); 
+                            }
+                        else
+                            {
+                                Console.WriteLine($"Atributes: {stepModel} not exist... !");
+                                return list_data;
+                            }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Atributes: {attr} not exist... !");
+                        return list_data;
+                    }
                 }
             }
-            else
+            catch(Exception ex)
             {
-                Console.WriteLine($"StepModel with StepId {stepId} not found.");
-                return null;
+                Console.WriteLine($"Error: {ex.Message}");
             }
+            return list_data;
         }
 
+     
         // PUBLIC INTERFACE
         public List<string> GetVarInThreadp(string attributeName, string threadName)
         {
@@ -181,6 +203,19 @@ namespace readxmlFile
             }
             return list_data;
         } 
+
+        public List<string> GetVar_1LevelInThreadp(string stepId, string attributesName, string  threadName)
+        {
+            List<string> list_data = new List<string>();
+
+            if(_data != null){
+                list_data = GetVar_1LevelInThread(_data, stepId, attributesName, threadName);
+            }
+            else{
+                Console.WriteLine("XML data not load.");
+            }
+            return list_data;
+        }
 
         private static string StrThr(string input)
         {

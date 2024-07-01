@@ -6,9 +6,12 @@ using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using System.Linq;
 using System.Xml.Linq;
+using Microsoft.EntityFrameworkCore;
 
 //using CSC;
 using readxmlFile;
+using Dsmdb;
+using System.Data.Common;
 
 
 # region Program
@@ -22,20 +25,31 @@ namespace DSMTester
             
         #region Introduction
 
-        if (args.Length < 2)
+
+        if (args.Length < 3)
          {
             Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
-            Console.WriteLine("[A] -> [A WKOBit CSC]");
-            Console.WriteLine("[  ]-> []");
+            Console.WriteLine("[A] -> [A WKOBit CSC 0]");
+            Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
             return;
         }
 
-        string choseOption = args[0];   // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit CSC]
-        string attributeName = args[1]; // Command-line argument, e.g., WKOBit
-        string nameThread = args[2];    // Command-line argument, e.g., CSC CRC TRC OPE
+        string choseOption = args[0];           // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit CSC 0]
+                                                //                              B - Find Variabel for 1 Level  [Ad EFASDatablock TRC 1] 
+        string attributeName = args[1];         // Command-line argument, e.g., WKOBit
+        string nameThread = args[2];            // Command-line argument, e.g., CSC CRC TRC OPE
+        string stepId = args[3];                // Command-line argument, e.g., 1     // int stepId = int.Parse(args[3]); //
         #endregion
         
         #region INSTANCEs
+
+        using (var context = new DsmDbConntext())
+        {
+            context.Database.EnsureCreated();
+            //var dbBasic = context.dbBasics.ToList();
+            //dbContext.SaveChanges();
+
+        }
         
         ReadXML _readXML= new ReadXML("myX.xml");
         //CSCThread myCSC = new CSCThread();
@@ -51,9 +65,9 @@ namespace DSMTester
                 askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          // This is public Function from class [ReadXML]
                 break;
 
-            // case "a":
-            //     GetThreadAll(doc, attributeName);
-            //     break;
+            case "Ad":
+                askThread = _readXML.GetVar_1LevelInThreadp(stepId, attributeName, nameThread);
+                break;
 
             default:
                 Console.WriteLine("Not chose ...");

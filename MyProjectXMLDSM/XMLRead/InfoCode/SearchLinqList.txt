@@ -1,97 +1,14 @@
-To achieve your goal of parsing the XML data and allowing LINQ queries on it, you can use a combination of LINQ to XML and C# collections like `List<T>`. Here's a step-by-step approach to how you can parse the XML data, extract the information, and store it in a list for easy querying.
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore.Tools
 
-First, ensure you have the necessary using directives:
 
-```csharp
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
+<ItemGroup>
+    <Compile Include="Db\DbConnect.cs" />
+    <!-- Include other necessary files if needed -->
+  </ItemGroup>
+
 ```
-
-### 1. Parse the XML Data
-You need to parse the `AllSteps` and `AllVariables` XML data into respective lists. Let's start by defining a couple of classes to represent the data:
-
-```csharp
-public class StepModel
-{
-    public int StepId { get; set; }
-    public string Name { get; set; }
-    public int EFASDatablock { get; set; }
-    public int EFASByte { get; set; }
-    public int ESTRCDatablock { get; set; }
-    public int ESTRCByte { get; set; }
-    public int DateTimeDatablock { get; set; }
-    public int DateTimeStartByte { get; set; }
-    public string SelectedDateTimeType { get; set; }
-    // Add other properties as needed
-}
-
-public class VariableModel
-{
-    public int VariableId { get; set; }
-    public string Name { get; set; }
-}
-```
-
-### 2. Extracting Data from XML
-
-Here is how you can extract the `StepModel` and `VariableModel` data from the XML:
-
-```csharp
-XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == shapeId);
-
-if (shapeElement != null)
-{
-    var allStepsXml = shapeElement.Element("AllSteps")?.Value;
-    var allVariablesXml = shapeElement.Element("AllVariables")?.Value;
-
-    if (!string.IsNullOrEmpty(allStepsXml))
-    {
-        XElement allStepsElement = XElement.Parse(allStepsXml);
-        List<StepModel> steps = allStepsElement.Descendants("StepModel")
-            .Select(x => new StepModel
-            {
-                StepId = (int)x.Element("StepId"),
-                Name = (string)x.Element("Name"),
-                EFASDatablock = (int)x.Element("EFASDatablock"),
-                EFASByte = (int)x.Element("EFASByte"),
-                ESTRCDatablock = (int)x.Element("ESTRCDatablock"),
-                ESTRCByte = (int)x.Element("ESTRCByte"),
-                DateTimeDatablock = (int)x.Element("DateTimeDatablock"),
-                DateTimeStartByte = (int)x.Element("DateTimeStartByte"),
-                SelectedDateTimeType = (string)x.Element("SelectedDateTimeType")
-                // Map other properties as needed
-            }).ToList();
-
-        // Now you can query the steps list using LINQ
-        var stepNames = steps.Select(s => s.Name);
-        foreach (var name in stepNames)
-        {
-            Console.WriteLine(name);
-        }
-    }
-
-    if (!string.IsNullOrEmpty(allVariablesXml))
-    {
-        XElement allVariablesElement = XElement.Parse(allVariablesXml);
-        List<VariableModel> variables = allVariablesElement.Descendants("VariableModel")
-            .Select(x => new VariableModel
-            {
-                VariableId = (int)x.Element("VariableId"),
-                Name = (string)x.Element("Name")
-            }).ToList();
-
-        // Now you can query the variables list using LINQ
-        var variableNames = variables.Select(v => v.Name);
-        foreach (var name in variableNames)
-        {
-            Console.WriteLine(name);
-        }
-    }
-}
-```
-
 ### Explanation:
 
 1. **Parsing the XML Data**: 

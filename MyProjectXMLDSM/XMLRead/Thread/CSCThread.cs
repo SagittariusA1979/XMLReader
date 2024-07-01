@@ -187,9 +187,6 @@ namespace CSC
         
         }
         
-
-
-
         #region Methods 
         public bool CSC_cycle()
         {
