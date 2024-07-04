@@ -31,10 +31,11 @@ namespace DSMTester
             Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
             Console.WriteLine("[A] -> [A WKOBit CSC 0]");
             Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
+            Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
             return;
         }
 
-        string choseOption = args[0];           // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit CSC 0]
+        string choseOption = args[0];           // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit/up CSC 0]
                                                 //                              B - Find Variabel for 1 Level  [Ad EFASDatablock TRC 1] 
         string attributeName = args[1];         // Command-line argument, e.g., WKOBit
         string nameThread = args[2];            // Command-line argument, e.g., CSC CRC TRC OPE
@@ -67,6 +68,10 @@ namespace DSMTester
 
             case "Ad":
                 askThread = _readXML.GetVar_1LevelInThreadp(stepId, attributeName, nameThread);
+                break;
+
+            case "Al":
+                askThread = _readXML.GetVar_2LevelInThreadp(stepId, attributeName, nameThread);
                 break;
 
             default:

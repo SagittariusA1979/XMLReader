@@ -1,11 +1,21 @@
 
 //                 default:
-//                     throw new ArgumentException($"Unknown signal name: {NameSignal}");
+//                   throw new ArgumentException($"Unknown signal name: {NameSignal}");
 
 //                  _data = data ?? throw new ArgumentNullException(nameof(data));
 
 //                  if(shape.Name.LocalName == "PlcConsistencyThreadShape")
 
+// var thread = StrThr(_thread);
+//             var result = _doc.Descendants(_thread)
+//             .Where(x => x.Attribute("ACKDatablock") != null)
+//                          .Select(x => new
+//                          {
+//                              Id = x.Attribute("Id")?.Value,
+//                              ThreadName = x.Attribute("ThreadName")?.Value
+//                          });
+
+#define UP
 
 using System;
 using System.Collections;
@@ -94,6 +104,18 @@ namespace readxmlFile
                 var convString = StrThr(threadName);
                 var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);              // CSC CRC TRC OPE
 
+                #if UP // DEBUG
+                if(attributeName.Count() > 10)
+                {
+                    XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeName);
+
+                    foreach (XAttribute attr in shapeElement.Attributes())
+                    {
+                        Console.WriteLine($"{attr.Name}: {attr.Value}");
+                    }   
+                }
+                #endif // <--(end)
+                
                 foreach (var shape in shapes)
                 {
                     var attr = shape.Attribute(attributeName);                                          // This is a realy nessesery point, becouse when you use a Variabel = [AllSteps] this code return [XML structur]
@@ -133,8 +155,7 @@ namespace readxmlFile
                         Console.WriteLine($"Attribute {attributeName} not exist.");
                         return list_data;
                     }
-                }
-                
+                }  
             }
             catch (Exception ex)
             {
@@ -158,7 +179,6 @@ namespace readxmlFile
                     if (attr != null)
                     {
                         string attributeValue = attr.Value;
-                        //list_data.Add(attributeValue);
 
                         XDocument dipdata = XDocument.Parse(attributeValue);                // second dip search in  variables of AllSteps
                         var stepModel = dipdata.Descendants("StepModel").Where(e => (string)e.Element("StepId") == stepId).FirstOrDefault();
@@ -189,7 +209,52 @@ namespace readxmlFile
             return list_data;
         }
 
-     
+        private static List<string> GetVar_2LevelInThread(XDocument _doc, string stepId, string attributesName, string  threadName)
+        {
+            List<string> list_data = new List<string>();
+            
+            try
+            {
+                var convString = StrThr(threadName);
+                var shape = _doc.Descendants().Where(e => e.Name.LocalName == convString);
+
+                foreach(var shapes in shape)
+                {
+                    var attr = shapes.Attribute("AllSteps");
+                    if(attr != null)
+                    {
+                        string attributeValue = attr.Value;
+                        XDocument dipdata = XDocument.Parse(attributeValue);
+                        var stepModel = dipdata.Descendants("StepModel").Where(e => (string)e.Element("StepId") == stepId).FirstOrDefault();
+
+                         if(stepModel != null)
+                         {
+                            var variableId = stepModel.Descendants("StepReferenceModel")
+                            .Select(x => (string)x.Element(attributesName))
+                            .FirstOrDefault();
+
+                            list_data.Add(variableId);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Atribut : {stepModel} not exist");
+                            return list_data;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Atribut: {attr} not exist");
+                        return list_data;
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+            }
+            return list_data;
+        }
+
         // PUBLIC INTERFACE
         public List<string> GetVarInThreadp(string attributeName, string threadName)
         {
@@ -215,6 +280,20 @@ namespace readxmlFile
                 Console.WriteLine("XML data not load.");
             }
             return list_data;
+        }
+
+        public List<string>GetVar_2LevelInThreadp(string stepId, string attributesName, string  threadName)
+        {
+            List<string> list_data = new List<string>();
+
+            if(_data != null){
+                list_data = GetVar_2LevelInThread(_data, stepId, attributesName, threadName);
+            }else{
+                Console.WriteLine("Error");
+                return list_data;
+            }
+            return list_data;
+
         }
 
         private static string StrThr(string input)

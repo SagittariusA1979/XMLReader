@@ -1,16 +1,21 @@
-dotnet add package Microsoft.EntityFrameworkCore.SqlServer
-dotnet add package Microsoft.EntityFrameworkCore.Sqlite
-dotnet add package Microsoft.EntityFrameworkCore.Tools
+<dotnetInformation>
 
-git rm -r --cached XMLRead/bin/
+   dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+   dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+   dotnet add package Microsoft.EntityFrameworkCore.Tools
+ </dotnetInformation>
 
+<gitInformation>
+
+   git rm -r --cached XMLRead/bin/
+ </gitInformation>
 
 <ItemGroup>
     <Compile Include="Db\DbConnect.cs" />
     <!-- Include other necessary files if needed -->
-  </ItemGroup>
+ </ItemGroup>
 
-```
+
 ### Explanation:
 
 1. **Parsing the XML Data**: 
