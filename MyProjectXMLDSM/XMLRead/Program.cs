@@ -11,7 +11,9 @@ using Microsoft.EntityFrameworkCore;
 //using CSC;
 using readxmlFile;
 using Dsmdb;
+using s7;
 using System.Data.Common;
+
 
 
 # region Program
@@ -29,7 +31,7 @@ namespace DSMTester
         if (args.Length < 3)
          {
             Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
-            Console.WriteLine("[A] -> [A WKOBit CSC 0]");
+            Console.WriteLine("[A] -> [A WKOBit CSC 0] and [A 15000c62-c116-4e3a-a97a-99970c6c8d01 CSC 0]");
             Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
             Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
             return;
@@ -52,12 +54,28 @@ namespace DSMTester
 
         }
         
-        ReadXML _readXML= new ReadXML("myX.xml");
+        ReadXML _readXML = new ReadXML("myX.xml");
+        S7con _connect = new S7con("192.168.1.5", 0, 1);   
+
         //CSCThread myCSC = new CSCThread();
         #endregion
 
 
         List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
+        
+// --> (CONNECT PLC)
+        var testConnect = _connect.connectPLc();
+
+        if(testConnect == true)
+        {
+             float realValue = _connect.ReadRealDataV02(1, 0); // DB1, start at DBD0
+             string text = _connect.ReadString(1, 8, 50); // DB1, start at DBB0, size 50 bytes
+
+            Console.WriteLine($"String read from DB1.DBB0: {text}");
+            Console.WriteLine($"Value read from DB1.DBD0: {realValue}");
+        }
+        _connect.disconnectPLc();
+// <-- (end!)                                              
 
         #region  SWITCH
         switch (choseOption.ToString())
@@ -96,6 +114,10 @@ namespace DSMTester
                 Console.WriteLine(_item);
             }
         }
+
+        #region Test Method
+    
+        #endregion
 
         }
     }

@@ -3,6 +3,9 @@
    dotnet add package Microsoft.EntityFrameworkCore.SqlServer
    dotnet add package Microsoft.EntityFrameworkCore.Sqlite
    dotnet add package Microsoft.EntityFrameworkCore.Tools
+
+   dotnet add package Snap7 /https://snap7.sourceforge.net//
+   dotnet add package Sharp7
  </dotnetInformation>
 
 <gitInformation>

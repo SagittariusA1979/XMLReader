@@ -15,7 +15,7 @@
 //                              ThreadName = x.Attribute("ThreadName")?.Value
 //                          });
 
-#define UP
+#define DEBUG
 
 using System;
 using System.Collections;
@@ -104,7 +104,7 @@ namespace readxmlFile
                 var convString = StrThr(threadName);
                 var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);              // CSC CRC TRC OPE
 
-                #if UP // DEBUG
+                #if DRBUG // DEBUG
                 if(attributeName.Count() > 10)
                 {
                     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeName);
