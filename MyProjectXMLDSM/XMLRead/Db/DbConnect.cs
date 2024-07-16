@@ -7,7 +7,8 @@ namespace Dsmdb
     public class DsmDbConntext:DbContext
     {
         #region Tables from DataBase
-        public DbSet<dbBasic> dbBasics{ get; set; }
+        public DbSet<dbModel> dbModels{ get; set; }
+        public DbSet<dbComp> dbComps{ get; set; }
         #endregion
 
         public DsmDbConntext(){}
@@ -17,6 +18,13 @@ namespace Dsmdb
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseSqlite($"Filename={Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "databaseDSM.sqlite")}");
         }
+
+       // public void()
+
+        #region Methods
+
+        #endregion
+
       
     }
 }

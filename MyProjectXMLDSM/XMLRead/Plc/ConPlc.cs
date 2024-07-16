@@ -20,8 +20,16 @@
 //         client.Disconnect();
 //     }
 // }
+// -----------------------------------------------------------------------------------------------------------
+// ACK
+// REQ
+// WKO WOK
+// DMC or COMP
+// ModelDataBloc
+// WorkResult
 
-#define DEBUG
+
+//#define DEBUG
 
 using System;
 using System.Text;
@@ -32,7 +40,7 @@ namespace s7
 {
     class S7con
     {
-         private S7Client _client;
+        private S7Client _client;
         private string _ipAddress;
         private int _slot;
         private int _rack;
@@ -52,46 +60,60 @@ namespace s7
             var result = _client.ConnectTo(_ipAddress, _rack, _slot);
             return result == 0;
         }
-
         public int disconnectPLc()
         {
             return _client.Disconnect();
         }
-
-        public float[] ReadRealDataV01(int dbNumber, int start, int count)
+        public bool ReadBit(int dbNumber, int byteIndex, int bitIndex)
         {
-            int size = count * 4; // Each REAL (float) is 4 bytes
-            byte[] buffer = new byte[size];
-            int result = _client.DBRead(dbNumber, start, size, buffer);
+            byte[] buffer = new byte[1]; // We only need to read 1 byte
+            int result = _client.DBRead(dbNumber, byteIndex, 1, buffer); // DBx | byte | range of byte to read | plase wher pass data after read.
 
-            if (result == 0)
+            try
             {
-                float[] values = new float[count];
-                for (int i = 0; i < values.Length; i++)
+                if (result == 0)
                 {
-                    values[i] = BitConverter.ToSingle(buffer, i * 4);
+                    // Extract the bit at bitIndex from the byte
+                    byte b = buffer[0];
+                    bool bit = (b & (1 << bitIndex)) != 0;
+                    return bit;
                 }
-                return values;
+                else
+                {
+                    throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
+                }
             }
-            else
+            finally
             {
-                throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
-            }
+                _client.Disconnect();
+            } 
         }
+        public byte ReadByte(int dbNumber, int byteIndex)
+        {
+              try
+                {
+                    byte[] buffer = new byte[1];
 
-        public float ReadRealDataV02(int dbNumber, int start)
+                    // Read 1 byte from the specified DB and byte address
+                    int result = _client.DBRead(dbNumber, byteIndex, 1, buffer);
+
+                    if (result != 0) // Non-zero means reading failed
+                    {
+                        throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
+                    }
+                    // Return the read byte value
+                    return buffer[0];
+                }
+                finally
+                {
+                    // Disconnect from the PLC
+                    _client.Disconnect();
+                }
+        }
+         public float ReadRealData(int dbNumber, int start)
         {
             byte[] buffer = new byte[4]; // A REAL is 4 bytes
             int result = _client.DBRead(dbNumber, start, 4, buffer);
-
-            // if (result == 0)
-            // {
-            //     return BitConverter.ToSingle(buffer, 0);
-            // }
-            // else
-            // {
-            //     throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
-            // }
 
             if (result == 0)
             {
@@ -108,7 +130,6 @@ namespace s7
                 throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
             }
         }
-
         public string ReadString(int dbNumber, int start, int size)
         {
             byte[] buffer = new byte[size];
@@ -118,6 +139,30 @@ namespace s7
             {
                 // Convert the byte array to a string
                 return Encoding.Default.GetString(buffer);
+            }
+            else
+            {
+                throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
+            }
+        }
+
+
+
+        #if DEBUG // Debug only
+        public float[] ReadRealDataV01(int dbNumber, int start, int count)
+        {
+            int size = count * 4; // Each REAL (float) is 4 bytes
+            byte[] buffer = new byte[size];
+            int result = _client.DBRead(dbNumber, start, size, buffer);
+
+            if (result == 0)
+            {
+                float[] values = new float[count];
+                for (int i = 0; i < values.Length; i++)
+                {
+                    values[i] = BitConverter.ToSingle(buffer, i * 4);
+                }
+                return values;
             }
             else
             {
@@ -162,8 +207,7 @@ namespace s7
                 throw new Exception($"Error writing to the PLC: {_client.ErrorText(result)}");
             }
         }
-
-
+        #endif
         #endregion
     } 
 }

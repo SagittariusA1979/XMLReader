@@ -104,13 +104,13 @@ namespace readxmlFile
                 var convString = StrThr(threadName);
                 var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);              // CSC CRC TRC OPE
 
-                #if DRBUG // DEBUG
+                #if DEBUG // DEBUG
                 if(attributeName.Count() > 10)
                 {
                     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeName);
 
                     foreach (XAttribute attr in shapeElement.Attributes())
-                    {
+                    {                      
                         Console.WriteLine($"{attr.Name}: {attr.Value}");
                     }   
                 }
@@ -255,6 +255,60 @@ namespace readxmlFile
             return list_data;
         }
 
+        private static List<string> StepQuestion(XDocument doc, string threadName)
+        {
+            List<string> list_data = new List<string>();
+            try
+            {
+                XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == "3c90b0d0-09ec-4f9f-a23e-80ab02d8d260");
+
+                if (shapeElement != null)
+                {
+                    foreach (XAttribute attr in shapeElement.Attributes())
+                    {    
+                        if (attr.Name == "AllSteps")
+                        {
+                            // Load the nested XML from the AllSteps attribute
+                            XDocument allStepsDoc = XDocument.Parse(attr.Value);
+                            var stepIds = allStepsDoc.Descendants("StepId")
+                                                    .Select(step => step.Value)
+                                                    .ToList();
+
+                            list_data.AddRange(stepIds);
+                        }         
+                    }
+                }
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+            return list_data; ;
+
+
+            // [*]
+            // List<string> list_data = new List<string>();
+            // try
+            // {
+            //     // [*]
+            //     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == "3c90b0d0-09ec-4f9f-a23e-80ab02d8d260");
+
+            //     foreach (XAttribute attr in shapeElement.Attributes())
+            //     {    
+            //         if(attr.Name == "AllSteps")
+            //         {
+            //             Console.WriteLine($"{attr.Name}: {attr.Value}"); // All <> nested
+            //         }         
+            //     }  
+            // } 
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine($"Error: {ex.Message}");
+            // }
+            // return list_data;
+          
+        }
+
         // PUBLIC INTERFACE
         public List<string> GetVarInThreadp(string attributeName, string threadName)
         {
@@ -294,6 +348,20 @@ namespace readxmlFile
             }
             return list_data;
 
+        }
+
+        public List<string> StepQuestip(string threadName)
+        {
+            var list_data = new List<string>();
+
+            if(_data != null)
+            {
+                list_data = StepQuestion(_data, threadName);
+            }else{
+                Console.WriteLine("Error");
+                return list_data;
+            }
+            return list_data;
         }
 
         private static string StrThr(string input)

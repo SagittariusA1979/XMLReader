@@ -9,11 +9,13 @@ using System.Xml.Linq;
 using System.Dynamic;
 
 using readxmlFile;
+using s7;
+using System.Net.Http.Headers;
 
 
 namespace CSC 
 {
-    public class CSCThread
+    public class XThread
     {   
         #region Private Variables
 
@@ -48,9 +50,13 @@ namespace CSC
         private int _workResultByte;
 
         private int _numberOfSteps;          // Number of step per cycle
-        
-        #endregion
 
+        private string fileName;
+        private string IpAddres;
+        private int slot;
+        private int rack;
+
+        #endregion
         #region Ret/Set
     //     public string ThreadName
     //     {
@@ -178,35 +184,118 @@ namespace CSC
     //     }  
 
         #endregion
-        
-        private ReadXML mReadXML; 
+        #region INSTANCE
+        private ReadXML mReadXML;
+        private S7con mS7con;
+        #endregion 
 
-        public CSCThread()
+        public XThread(string fileName, string IpAddres, int slot, int rack)
         {
-            
-        
+            mReadXML = new ReadXML(fileName);
+            mS7con = new S7con(IpAddres, slot, rack); 
         }
         
-        #region Methods 
         public bool CSC_cycle()
         {
-            bool cycleOK = false;
+            bool cycleStatus = false;
 
+            #region DESCRYYPTION
+            
             //  PLC -> | DMC | Model |           set:REQ
-            //  DSM <- | WKO or WOK | WR error | set:ACK 
-            //
+            //  DSM <- | WKO or WOK | WR error | set:ACK
 
-            //if (REQ == 1){} // start
-                // check Model and DMC from SQLite [Model][DMC] [2][824501]
+            // Check: refer to DMC and Model in DataBase     
+            #endregion
 
+            var dmc = dmcRead();
+            var model = modelRead();
 
-            if(cycleOK == true){
-                return true;
-            }
-            else{
-                return false;
-            }
+            //DEBUG only
+            Console.WriteLine($"DMC:{dmc} Model:{model}");
+
+            return cycleStatus;
         }
-        #endregion
+        public bool TRC_cycle()
+        {
+            bool cycleStatus = false;
+
+            return cycleStatus;
+        }
+        public bool CRC_cycle()
+        {
+            bool cycleStatus = false;
+
+            return cycleStatus;
+        }
+
+  
+
+        private bool ACK_Check()
+        {
+            bool AckStatus = false;
+            // code ...
+            return AckStatus;
+        }
+        private bool REQ_Check()
+        {
+            bool RqeStatus = false;
+            // code ...
+            return RqeStatus;
+        }
+
+        private string dmcRead()
+        {
+            string returnDmc = "No Value";
+
+            var DB_dmc = mReadXML.GetVarInThreadp("DMCDatablock", "CSC");
+            var Byte_dmc = mReadXML.GetVarInThreadp("DMCStartByte", "CSC");
+            var Lenght_dmc = mReadXML.GetVarInThreadp("DMCLenght", "CSC");
+
+            if((DB_dmc.Count > 0) && (Byte_dmc.Count > 0) && (Lenght_dmc.Count > 0))
+            {
+                int _dMCDatablock = int.Parse(DB_dmc[0]);
+                int _dMCStartByte = int.Parse(Byte_dmc[0]);
+                int _dMCLenght = int.Parse(Lenght_dmc[0]);
+
+                if (mS7con.connectPLc())
+                {
+                    string DMC = mS7con.ReadString(_dMCDatablock, _dMCStartByte, _dMCLenght);
+                    returnDmc = DMC;
+                    
+                }
+                else
+                {
+                    throw new Exception("Not connect to PLC !");
+                }
+                return returnDmc;
+            }
+            return returnDmc;
+        }
+        private int modelRead()
+            {
+                int returnModel = 0;
+
+                var DB_model = mReadXML.GetVarInThreadp("ModelDatablock", "CSC");
+                var Byte_model = mReadXML.GetVarInThreadp("ModelByte", "CSC");
+
+                if((DB_model.Count > 0) && (Byte_model.Count > 0))
+                {
+                    int _modelDatablock = int.Parse(DB_model[0]);
+                    int _modelByte = int.Parse(DB_model[0]);
+
+                    if(mS7con.connectPLc())
+                    {
+                        int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
+                        returnModel = NModel;
+                    }
+                    else
+                    {
+                        throw new Exception("Not connect to PLC !");
+                    }
+                    return returnModel;
+                }
+                return returnModel;
+            }
+
     }
 }

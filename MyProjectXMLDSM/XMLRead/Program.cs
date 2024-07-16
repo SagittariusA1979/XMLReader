@@ -1,4 +1,7 @@
-﻿using System;
+﻿//#define PLC
+//#define DB
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +11,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 
-//using CSC;
+using CSC;
 using readxmlFile;
 using Dsmdb;
 using s7;
@@ -31,9 +34,12 @@ namespace DSMTester
         if (args.Length < 3)
          {
             Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
-            Console.WriteLine("[A] -> [A WKOBit CSC 0] and [A 15000c62-c116-4e3a-a97a-99970c6c8d01 CSC 0]");
+            Console.WriteLine("[A] -> [A WKOBit CSC 0] and [A 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260 x x]"); // We can check a all information
             Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
             Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
+
+            Console.WriteLine("[T]-> [T TRC x x]");
+
             return;
         }
 
@@ -46,59 +52,89 @@ namespace DSMTester
         
         #region INSTANCEs
 
+        #if DB
+        // https://learn.microsoft.com/pl-pl/dotnet/csharp/linq/get-started/walkthrough-writing-queries-linq
         using (var context = new DsmDbConntext())
         {
             context.Database.EnsureCreated();
-            //var dbBasic = context.dbBasics.ToList();
+
+            var my_m = context.dbModels
+                .Where(x => x.ModelCode == "2")
+                .Select(x => x.NumberOfModels)
+                .ToList();
+            
+            var my_c = context.dbComps
+                .Where(x => x.NumberOfModel == "2")
+                .Select(x => x.CompCode)
+                .ToList();
+
+           foreach (var model in my_m)
+           {
+            foreach(var comp in my_c)
+            {
+                Console.WriteLine($"COMP: {comp}");
+            }
+            Console.WriteLine($"MODEL: {model}");
+           }
             //dbContext.SaveChanges();
 
         }
+        #endif
         
         ReadXML _readXML = new ReadXML("myX.xml");
         S7con _connect = new S7con("192.168.1.5", 0, 1);   
 
-        //CSCThread myCSC = new CSCThread();
+        // XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
+        // var ststus = myCSC.CSC_cycle();
         #endregion
 
-
-        List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
-        
-// --> (CONNECT PLC)
+        #if PLC
         var testConnect = _connect.connectPLc();
 
         if(testConnect == true)
         {
-             float realValue = _connect.ReadRealDataV02(1, 0); // DB1, start at DBD0
+             float realValue = _connect.ReadRealData(1, 0); // DB1, start at DBD0
              string text = _connect.ReadString(1, 8, 50); // DB1, start at DBB0, size 50 bytes
 
             Console.WriteLine($"String read from DB1.DBB0: {text}");
             Console.WriteLine($"Value read from DB1.DBD0: {realValue}");
         }
         _connect.disconnectPLc();
-// <-- (end!)                                              
+        #endif
+
+
+        List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
 
         #region  SWITCH
         switch (choseOption.ToString())
         {
             case "A":
-                askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          // This is public Function from class [ReadXML]
+                // This is public Function from class [ReadXML]
+                askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          
                 break;
 
             case "Ad":
+                // This is public Function from class [ReadXML]
                 askThread = _readXML.GetVar_1LevelInThreadp(stepId, attributeName, nameThread);
                 break;
 
             case "Al":
+                // This is public Function from class [ReadXML]
                 askThread = _readXML.GetVar_2LevelInThreadp(stepId, attributeName, nameThread);
+                break;
+
+            case "T":
+                // Test only 
+                askThread  = _readXML.StepQuestip(nameThread);
                 break;
 
             default:
                 Console.WriteLine("Not chose ...");
                 break;
         }
-        #endregion
-
-        if (askThread.Count > 0)                                                    // I check function [askThread = _readXML.GetVarInThreadp(attributeName, nameThread);]
+       
+        // I check function [askThread = _readXML.GetVarInThreadp(attributeName, nameThread);]
+        if (askThread.Count > 0)                                                    
         {
             //Console.WriteLine($"{askThread[0]}");
 
@@ -114,11 +150,10 @@ namespace DSMTester
                 Console.WriteLine(_item);
             }
         }
-
-        #region Test Method
-    
         #endregion
 
+        #region Test Method
+        #endregion
         }
     }
 }
