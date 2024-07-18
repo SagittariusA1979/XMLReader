@@ -1,11 +1,30 @@
+// --------------------------------------------------------------------------
+            // List<string> list_data = new List<string>();
+            // try
+            // {
+            //     // [*]
+            //     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == "3c90b0d0-09ec-4f9f-a23e-80ab02d8d260");
 
-//                 default:
+            //     foreach (XAttribute attr in shapeElement.Attributes())
+            //     {    
+            //         if(attr.Name == "AllSteps")
+            //         {
+            //             Console.WriteLine($"{attr.Name}: {attr.Value}"); // All <> nested
+            //         }         
+            //     }  
+            // } 
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine($"Error: {ex.Message}");
+            // }
+            // return list_data;
+// -----------------------------------------------------------------------------
 //                   throw new ArgumentException($"Unknown signal name: {NameSignal}");
-
+// -----------------------------------------------------------------------------
 //                  _data = data ?? throw new ArgumentNullException(nameof(data));
-
+// -----------------------------------------------------------------------------
 //                  if(shape.Name.LocalName == "PlcConsistencyThreadShape")
-
+// -----------------------------------------------------------------------------
 // var thread = StrThr(_thread);
 //             var result = _doc.Descendants(_thread)
 //             .Where(x => x.Attribute("ACKDatablock") != null)
@@ -14,8 +33,11 @@
 //                              Id = x.Attribute("Id")?.Value,
 //                              ThreadName = x.Attribute("ThreadName")?.Value
 //                          });
+//-------------------------------------------------------------------------------
 
-#define DEBUG
+#define DEBUG                   // function -> private static List<string> GetVarInThread(XDocument doc, string attributeName, string threadName) 
+//#define STEPS_WHIT_NAME         // function -> private static List<string> StepQuestion(XDocument doc, string threadName). This is switch [on/off]
+
 
 using System;
 using System.Collections;
@@ -77,8 +99,15 @@ namespace readxmlFile
             { "CRC", "PlcCongruencyThreadShape" },
             { "TRC", "PlcTraceabilityThreadShape" }
         };
+
+        private class AllStepsData // Data for function -> private static List<string> StepQuestion(XDocument doc, string threadName)
+            {
+                public string Name { get; set; }
+                public string StepId { get; set; }
+            }
         #endregion
 
+        
         public ReadXML(string filename)
         {
             _currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -104,7 +133,7 @@ namespace readxmlFile
                 var convString = StrThr(threadName);
                 var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);              // CSC CRC TRC OPE
 
-                #if DEBUG // DEBUG
+                #if DEBUG // DEBUG to manage this solution -> [A 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260 x x]
                 if(attributeName.Count() > 10)
                 {
                     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeName);
@@ -118,7 +147,8 @@ namespace readxmlFile
                 
                 foreach (var shape in shapes)
                 {
-                    var attr = shape.Attribute(attributeName);                                          // This is a realy nessesery point, becouse when you use a Variabel = [AllSteps] this code return [XML structur]
+                    // This is a realy nessesery point, becouse when you use a Variabel = [AllSteps] this code return [XML structur]
+                    var attr = shape.Attribute(attributeName);                                          
                     
                     if (attr != null)
                     {
@@ -147,7 +177,6 @@ namespace readxmlFile
                         // }
                         //-------------------------------------<<
                         #endregion
-
                         //Console.WriteLine($"{attributeName} value for shape with Id '{shape.Attribute("Id")?.Value}': {attributeValue}");
                     }
                     else
@@ -255,12 +284,36 @@ namespace readxmlFile
             return list_data;
         }
 
-        private static List<string> StepQuestion(XDocument doc, string threadName)
+        private static List<string> StepNUM(XDocument doc, string threadName)
         {
             List<string> list_data = new List<string>();
+            #if STEPS_WHIT_NAME 
+            List<AllStepsData> tuple_data = new List<AllStepsData>();
+            #endif
+            string attributeValue = string.Empty;
+        
             try
-            {
-                XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == "3c90b0d0-09ec-4f9f-a23e-80ab02d8d260");
+            { // --> (start)
+                var convString = StrThr(threadName);
+                var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);
+
+                foreach (var shape in shapes)
+                {
+                    var attr = shape.Attribute("Id");
+                        
+                    if (attr != null)
+                    {
+                        attributeValue = attr.Value;
+                        //list_data.Add(attributeValue);
+                    }
+                    else
+                    {
+                        Console.WriteLine("not exist.");
+                        return list_data;
+                    }
+                } // This plase I finsih a first search (end!) <--
+
+                XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeValue);
 
                 if (shapeElement != null)
                 {
@@ -273,8 +326,27 @@ namespace readxmlFile
                             var stepIds = allStepsDoc.Descendants("StepId")
                                                     .Select(step => step.Value)
                                                     .ToList();
-
                             list_data.AddRange(stepIds);
+
+                            #if STEPS_WHIT_NAME // Only debug (when I commpare StepId whit Step's Name)
+                            var steps = allStepsDoc.Descendants()   
+                               .Where(step => step.Name == "Name" || step.Name == "StepId")
+                               .GroupBy(step => step.Parent)
+                               .Select(group => new AllStepsData
+                               {
+                                   Name = group.FirstOrDefault(x => x.Name == "Name")?.Value,
+                                   StepId = group.FirstOrDefault(x => x.Name == "StepId")?.Value
+                               })
+                               .ToList();
+
+                            tuple_data.AddRange(steps);
+
+                            foreach (var step in tuple_data)
+                            {
+                                // The result of search
+                                Console.WriteLine($"Name: {step.Name}, StepId: {step.StepId}");
+                            }
+                            #endif
                         }         
                     }
                 }
@@ -283,31 +355,78 @@ namespace readxmlFile
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
-            return list_data; ;
-
-
-            // [*]
-            // List<string> list_data = new List<string>();
-            // try
-            // {
-            //     // [*]
-            //     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == "3c90b0d0-09ec-4f9f-a23e-80ab02d8d260");
-
-            //     foreach (XAttribute attr in shapeElement.Attributes())
-            //     {    
-            //         if(attr.Name == "AllSteps")
-            //         {
-            //             Console.WriteLine($"{attr.Name}: {attr.Value}"); // All <> nested
-            //         }         
-            //     }  
-            // } 
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine($"Error: {ex.Message}");
-            // }
-            // return list_data;
-          
+            return list_data;         
         }
+
+        private static bool AllInfoXML(XDocument doc, string threadName)
+        {
+            List<AllStepsData> allSteps_data = new List<AllStepsData>();
+            string attributeValue = string.Empty;
+        
+            try
+            {   
+                // Description, how it to work: Conversion e.g. CSC to description string
+                // OPE        --> OperationShape    --> [Id: 98dc2b41-4f29-4bb6-a065-7dae31a1f7f8]
+                // threadName --> convString        --> attributeValue = attr.Value; 
+
+                var convString = StrThr(threadName);
+                var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);
+
+                // This is first search
+                foreach (var shape in shapes){
+                    var attr = shape.Attribute("Id");
+                        
+                    if (attr != null){
+                        attributeValue = attr.Value;
+                    }
+                    else{
+                        Console.WriteLine($"Issue into: Convert Thread to code e.g [Id: 98dc2b41-4f29-4bb6-a065-7dae31a1f7f8]:{attr}");
+                        return false;
+                    }
+                } 
+                
+                // Start to looking for into Attribute
+                XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeValue);
+                if (shapeElement != null)
+                {
+                    foreach (XAttribute attr in shapeElement.Attributes())
+                    {   
+                        // // Looking for variables for a AllSteps
+                        if (attr.Name == "AllSteps"){
+
+                            // Load the nested XML from the AllSteps attribute
+                            XDocument allStepsDoc = XDocument.Parse(attr.Value);
+                            
+                            var steps = allStepsDoc.Descendants()
+                               .Where(step => step.Name == "Name" || step.Name == "StepId")
+                               .GroupBy(step => step.Parent)
+                               .Select(group => new AllStepsData
+                               {
+                                   Name = group.FirstOrDefault(x => x.Name == "Name")?.Value,
+                                   StepId = group.FirstOrDefault(x => x.Name == "StepId")?.Value,
+                               })
+                               .ToList();
+
+                            allSteps_data.AddRange(steps);
+
+                            foreach (var step in allSteps_data){
+                                Console.WriteLine($"Name:{step.Name}, StepId:{step.StepId}");
+                            }
+
+                        }else{
+                            Console.WriteLine($"Other attributes of AllSteps: :{attr.Name}");
+                        }   
+                    }
+                }else{
+                    throw new Exception($":{shapeElement}:is null !");
+                }
+            } 
+            catch (Exception ex){
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+            return true;       
+        }
+        
 
         // PUBLIC INTERFACE
         public List<string> GetVarInThreadp(string attributeName, string threadName)
@@ -350,18 +469,28 @@ namespace readxmlFile
 
         }
 
-        public List<string> StepQuestip(string threadName)
+        public List<string> StepNUMp(string threadName)
         {
             var list_data = new List<string>();
 
             if(_data != null)
             {
-                list_data = StepQuestion(_data, threadName);
+                list_data = StepNUM(_data, threadName);
             }else{
                 Console.WriteLine("Error");
                 return list_data;
             }
             return list_data;
+        }
+
+        public bool AllInfoXMLp(string threadName)
+        {
+            if(_data != null){
+                return AllInfoXML(_data, threadName);
+            }else{
+                Console.WriteLine("Error in function AllInformatinTRCp()");
+                return false;
+            }
         }
 
         private static string StrThr(string input)

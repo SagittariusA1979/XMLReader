@@ -38,7 +38,8 @@ namespace DSMTester
             Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
             Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
 
-            Console.WriteLine("[T]-> [T TRC x x]");
+            Console.WriteLine("[T] -> [T x CSC x ]");
+            Console.WriteLine("[I] -> [I x CSC x ]");
 
             return;
         }
@@ -125,7 +126,13 @@ namespace DSMTester
 
             case "T":
                 // Test only 
-                askThread  = _readXML.StepQuestip(nameThread);
+                askThread  = _readXML.StepNUMp(nameThread);
+                Console.WriteLine($"Number of all steps: {askThread.Count}");
+                break;
+
+            case "I":
+                var result = _readXML.AllInfoXMLp(nameThread);
+                Console.WriteLine($"INFO:{result.ToString()}");
                 break;
 
             default:
