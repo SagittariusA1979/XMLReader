@@ -64,6 +64,8 @@ namespace s7
         {
             return _client.Disconnect();
         }
+
+        // Read value from PLC
         public bool ReadBit(int dbNumber, int byteIndex, int bitIndex)
         {
             byte[] buffer = new byte[1]; // We only need to read 1 byte
@@ -146,6 +148,107 @@ namespace s7
             }
         }
 
+         // Write value to PLC 
+        public bool WriteBit(int dbNumber, int byteIndex, int bitIndex, bool value)
+        {
+        
+        byte[] buffer = new byte[1]; // We only need to read 1 byte
+        int result = _client.DBRead(dbNumber, byteIndex, 1, buffer); // DBx | byte | range of byte to read | place where pass data after read
+
+        try
+        {
+            if (result == 0)
+            {
+                byte b = buffer[0];
+
+                if (value){
+                    b |= (byte)(1 << bitIndex); // Set the bit
+                }
+                else{
+                    b &= (byte)~(1 << bitIndex); // Clear the bit
+                }
+
+                // Write the byte to the PLC
+                buffer[0] = b;
+                result = _client.DBWrite(dbNumber, byteIndex, 1, buffer); // DBx | byte | range of byte to write | place where data is to be written
+                
+                if (result != 0){
+                    throw new Exception($"Error writing to the PLC: {_client.ErrorText(result)}");
+                }
+                return true;
+            }
+            else{
+                throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
+            }
+        }
+        finally{
+           // _client.Disconnect();
+        }
+    }
+
+        public bool WriteByte(int dbNumber, int byteIndex, byte value)
+        {
+            int result = 0;
+
+            try
+            {
+                byte[] buffer = new byte[] { value };
+
+                result = _client.DBWrite(dbNumber, byteIndex, 1, buffer);
+
+                // Non-zero means writing failed
+                if (result != 0) {
+                    throw new Exception($"Error writing to the PLC: {_client.ErrorText(result)}");
+                }
+            }
+            finally
+            {
+                //_client.Disconnect();
+            }
+            return true;
+        }
+
+        public bool WriteRealData(int dbNumber, int start, float value)
+        {
+            // Convert the float value to a byte array
+            byte[] buffer = BitConverter.GetBytes(value);
+
+            // Reverse bytes if the PLC uses big-endian format and the system is little-endian
+            if (BitConverter.IsLittleEndian){
+                Array.Reverse(buffer);
+            }
+
+            int result = _client.DBWrite(dbNumber, start, 4, buffer);
+
+            if (result != 0){
+                throw new Exception($"Error writing to the PLC: {_client.ErrorText(result)}");
+            }
+            return true;
+        }
+
+        public bool WriteString(int dbNumber, int start, string value, int size)
+        {
+            // Convert the string to a byte array
+            byte[] buffer = Encoding.Default.GetBytes(value);
+
+            // Ensure the buffer is the correct size by padding or truncating if necessary
+            if (buffer.Length > size){
+                // Truncate the buffer if it's too long
+                Array.Resize(ref buffer, size);
+            }
+            else if (buffer.Length < size){
+                // Pad the buffer with zeros if it's too short
+                Array.Resize(ref buffer, size);
+            }
+
+            // Write the byte array to the PLC
+            int result = _client.DBWrite(dbNumber, start, size, buffer);
+
+            if (result != 0){
+                throw new Exception($"Error writing to the PLC: {_client.ErrorText(result)}");
+            }
+            return true;
+        }
 
 
         #if DEBUG // Debug only

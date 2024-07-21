@@ -1,4 +1,4 @@
-﻿//#define PLC
+﻿//define PLC
 //#define DB
 
 using System;
@@ -83,7 +83,7 @@ namespace DSMTester
         #endif
         
         ReadXML _readXML = new ReadXML("myX.xml");
-        S7con _connect = new S7con("192.168.1.5", 0, 1);   
+        S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5   
 
         // XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
         // var ststus = myCSC.CSC_cycle();
@@ -94,11 +94,35 @@ namespace DSMTester
 
         if(testConnect == true)
         {
-             float realValue = _connect.ReadRealData(1, 0); // DB1, start at DBD0
-             string text = _connect.ReadString(1, 8, 50); // DB1, start at DBB0, size 50 bytes
+            //float realValue = _connect.ReadRealData(1, 0); // DB1, start at DBD0
+            //string text = _connect.ReadString(1001, 6, 50); // DB1, start at DBB0, size 50 bytes
 
-            Console.WriteLine($"String read from DB1.DBB0: {text}");
-            Console.WriteLine($"Value read from DB1.DBD0: {realValue}");
+            //Console.WriteLine($"String read from DB1.DBB0: {text}");
+            //Console.WriteLine($"Value read from DB1.DBD0: {realValue}");
+
+           
+            // int userValue;
+            // string input = Console.ReadLine();
+            // int.TryParse(input, out userValue);
+
+            // ConsoleKeyInfo keyInfo;
+            // do{
+            //     keyInfo = Console.ReadKey(intercept: true);
+            // }
+            // while (keyInfo.Key != ConsoleKey.Enter);
+           
+            // var key = Console.ReadKey();
+            // float keyInt = (float)key.KeyChar;
+
+            bool[] result = new bool[10];
+            float test = 241.7f;
+
+
+            result[0] = _connect.WriteBit(1001, 0, 4, true);
+            result[1] = _connect.WriteByte(1001, 1, 255);
+            result[2] = _connect.WriteRealData(1001, 2, test);
+            result[3] = _connect.WriteString(1001, 6, "#Test03", 50);
+            
         }
         _connect.disconnectPLc();
         #endif
