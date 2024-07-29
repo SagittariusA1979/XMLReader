@@ -134,7 +134,7 @@ namespace readxmlFile
                 var shapes = doc.Descendants().Where(e => e.Name.LocalName == convString);              // CSC CRC TRC OPE
 
                 #if DEBUG // DEBUG to manage this solution -> [A 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260 x x]
-                if(attributeName.Count() > 10)
+                if(attributeName.Count() > 20)
                 {
                     XElement shapeElement = doc.Descendants().FirstOrDefault(e => (string)e.Attribute("Id") == attributeName);
 

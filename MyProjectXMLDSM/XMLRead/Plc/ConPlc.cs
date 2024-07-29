@@ -87,10 +87,10 @@ namespace s7
             }
             finally
             {
-                _client.Disconnect();
+                //_client.Disconnect();
             } 
         }
-        public byte ReadByte(int dbNumber, int byteIndex)
+        public int ReadByte(int dbNumber, int byteIndex)
         {
               try
                 {
@@ -104,12 +104,12 @@ namespace s7
                         throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
                     }
                     // Return the read byte value
-                    return buffer[0];
+                    return (int)buffer[0];
                 }
                 finally
                 {
                     // Disconnect from the PLC
-                    _client.Disconnect();
+                    //_client.Disconnect();
                 }
         }
          public float ReadRealData(int dbNumber, int start)

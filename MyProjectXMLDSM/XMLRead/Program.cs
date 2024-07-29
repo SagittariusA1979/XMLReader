@@ -1,7 +1,9 @@
-﻿//define PLC
+﻿//#define PLC
 //#define DB
+//#define SWITCH
 
 using System;
+using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -59,34 +61,55 @@ namespace DSMTester
         {
             context.Database.EnsureCreated();
 
-            var my_m = context.dbModels
-                .Where(x => x.ModelCode == "2")
-                .Select(x => x.NumberOfModels)
-                .ToList();
+            // var my_m = context.dbModels
+            //     .Where(x => x.ModelCode == "2")
+            //     .Select(x => x.NumberOfModels)
+            //     .ToList();
             
-            var my_c = context.dbComps
-                .Where(x => x.NumberOfModel == "2")
-                .Select(x => x.CompCode)
-                .ToList();
+            // var my_c = context.dbComps
+            //     .Where(x => x.NumberOfModel == "2")
+            //     .Select(x => x.CompCode)
+            //     .ToList();
 
-           foreach (var model in my_m)
-           {
-            foreach(var comp in my_c)
-            {
-                Console.WriteLine($"COMP: {comp}");
-            }
-            Console.WriteLine($"MODEL: {model}");
-           }
+            // string? dmc = "8002";
+
+            // var numberOfmodelFromDB = context.dbModels
+            //         .Where(x => x.NumberOfModels == dmc)
+            //         .Select(x => x.ModelCode)
+            //         .ToList();
+
+        //    foreach (var model in my_m)
+        //    {
+        //     foreach(var comp in my_c)
+        //     {
+        //         Console.WriteLine($"COMP: {comp}");
+        //     }
+        //     Console.WriteLine($"MODEL: {model}");
+        //    }
+
+        //    foreach (var numbers in numberOfmodelFromDB){
+        //         Console.WriteLine($"#:{numbers}");
+        //     }
+
             //dbContext.SaveChanges();
 
         }
         #endif
         
-        ReadXML _readXML = new ReadXML("myX.xml");
-        S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5   
+        //ReadXML _readXML = new ReadXML("myX.xml");
+        //S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5   
 
-        // XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
-        // var ststus = myCSC.CSC_cycle();
+        XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
+
+        while (myCSC.IsAlive())
+        {   
+           
+            var status = myCSC.CSC_thread();
+            Console.WriteLine($"General status:{status}");
+
+            Thread.Sleep(2000);
+        }
+
         #endregion
 
         #if PLC
@@ -129,7 +152,8 @@ namespace DSMTester
 
 
         List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
-
+        
+        #if SWITCH
         #region  SWITCH
         switch (choseOption.ToString())
         {
@@ -182,6 +206,7 @@ namespace DSMTester
             }
         }
         #endregion
+        #endif
 
         #region Test Method
         #endregion

@@ -18,6 +18,101 @@
     <!-- Include other necessary files if needed -->
  </ItemGroup>
 
+<Examples to CSCThread DEBUG>
+               #if DEBUG
+                Console.WriteLine($"3 {!string.IsNullOrEmpty(c_dmc)}");
+                Console.WriteLine($"3 DMC value:{c_dmc} {c_dmc.CompareTo("8002")}");
+
+                // for (int i = 0; i < dmc.Length; i++){
+                //     Console.WriteLine($"Character '{dmc[i]}' has code {(int)dmc[i]}");
+                // }
+
+                // var allEntries = context.dbModels.ToList();
+                // foreach (var entry in allEntries)
+                // {
+                //     Console.WriteLine($"Database entry - NumberOfModels: '{entry.NumberOfModels}', ModelCode: '{entry.ModelCode}'");
+                // }
+                #endif
+</>
+
+<Thread>
+   using System;
+   using System.Threading;
+
+   class Program
+   {
+      static bool codeEnabled = true;
+
+      static void Main()
+      {
+         // Initial state: code is enabled
+         Console.WriteLine("Code is initially enabled.");
+
+         // Simulate disabling the code for 2 seconds
+         DisableCodeForDuration(2000);
+
+         // Keep the main thread alive long enough to see the effect
+         for (int i = 0; i < 10; i++)
+         {
+               if (codeEnabled)
+               {
+                  // Code that gets "deleted" for 2 seconds
+                  Console.WriteLine("Code is running...");
+               }
+               else
+               {
+                  Console.WriteLine("Code is temporarily disabled.");
+               }
+               Thread.Sleep(500); // Wait for 0.5 seconds before the next iteration
+         }
+      }
+
+      static void DisableCodeForDuration(int milliseconds)
+      {
+         // Start a new thread to disable the code for the specified duration
+         new Thread(() =>
+         {
+               codeEnabled = false;
+               Thread.Sleep(milliseconds);
+               codeEnabled = true;
+         }).Start();
+      }
+   }
+</>
+
+<CONVERS str to int>
+                  // Convers 
+                // foreach (var number in numberOfModelFromDB)
+                // {
+                //     if (int.TryParse(number, out int numberAsInt)){
+                //         Console.WriteLine($"Converted number: {numberAsInt}");
+                //     }
+                //     else{
+                //         Console.WriteLine($"'{number}' is not a valid integer.");
+                //     }
+                // }
+</>
+
+<EXAMPLES [bool? reqStatus = null;]>
+      bool? reqStatus = null;
+
+      // Check if the nullable boolean has a value
+      if (reqStatus.HasValue)
+        
+      // If it has a value, check if it's true or false
+      if (reqStatus.Value)
+</>
+
+
+
+
+
+
+
+
+
+
+
 
 ### Explanation:
 
