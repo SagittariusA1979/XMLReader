@@ -27,190 +27,226 @@ namespace DSMTester
 {
     public class DSMTester
     {
+        private static System.Threading.Timer _timer;
+        
+
         static void Main(string[] args)
         {
             
-        #region Introduction
+            #region Introduction
 
 
-        if (args.Length < 3)
-         {
-            Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
-            Console.WriteLine("[A] -> [A WKOBit CSC 0] and [A 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260 x x]"); // We can check a all information
-            Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
-            Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
-
-            Console.WriteLine("[T] -> [T x CSC x ]");
-            Console.WriteLine("[I] -> [I x CSC x ]");
-
-            return;
-        }
-
-        string choseOption = args[0];           // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit/up CSC 0]
-                                                //                              B - Find Variabel for 1 Level  [Ad EFASDatablock TRC 1] 
-        string attributeName = args[1];         // Command-line argument, e.g., WKOBit
-        string nameThread = args[2];            // Command-line argument, e.g., CSC CRC TRC OPE
-        string stepId = args[3];                // Command-line argument, e.g., 1     // int stepId = int.Parse(args[3]); //
-        #endregion
-        
-        #region INSTANCEs
-
-        #if DB
-        // https://learn.microsoft.com/pl-pl/dotnet/csharp/linq/get-started/walkthrough-writing-queries-linq
-        using (var context = new DsmDbConntext())
-        {
-            context.Database.EnsureCreated();
-
-            // var my_m = context.dbModels
-            //     .Where(x => x.ModelCode == "2")
-            //     .Select(x => x.NumberOfModels)
-            //     .ToList();
-            
-            // var my_c = context.dbComps
-            //     .Where(x => x.NumberOfModel == "2")
-            //     .Select(x => x.CompCode)
-            //     .ToList();
-
-            // string? dmc = "8002";
-
-            // var numberOfmodelFromDB = context.dbModels
-            //         .Where(x => x.NumberOfModels == dmc)
-            //         .Select(x => x.ModelCode)
-            //         .ToList();
-
-        //    foreach (var model in my_m)
-        //    {
-        //     foreach(var comp in my_c)
-        //     {
-        //         Console.WriteLine($"COMP: {comp}");
-        //     }
-        //     Console.WriteLine($"MODEL: {model}");
-        //    }
-
-        //    foreach (var numbers in numberOfmodelFromDB){
-        //         Console.WriteLine($"#:{numbers}");
-        //     }
-
-            //dbContext.SaveChanges();
-
-        }
-        #endif
-        
-        //ReadXML _readXML = new ReadXML("myX.xml");
-        //S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5   
-
-        XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
-
-        while (myCSC.IsAlive())
-        {   
-           
-            var status = myCSC.CSC_thread();
-            Console.WriteLine($"General status:{status}");
-
-            Thread.Sleep(2000);
-        }
-
-        #endregion
-
-        #if PLC
-        var testConnect = _connect.connectPLc();
-
-        if(testConnect == true)
-        {
-            //float realValue = _connect.ReadRealData(1, 0); // DB1, start at DBD0
-            //string text = _connect.ReadString(1001, 6, 50); // DB1, start at DBB0, size 50 bytes
-
-            //Console.WriteLine($"String read from DB1.DBB0: {text}");
-            //Console.WriteLine($"Value read from DB1.DBD0: {realValue}");
-
-           
-            // int userValue;
-            // string input = Console.ReadLine();
-            // int.TryParse(input, out userValue);
-
-            // ConsoleKeyInfo keyInfo;
-            // do{
-            //     keyInfo = Console.ReadKey(intercept: true);
-            // }
-            // while (keyInfo.Key != ConsoleKey.Enter);
-           
-            // var key = Console.ReadKey();
-            // float keyInt = (float)key.KeyChar;
-
-            bool[] result = new bool[10];
-            float test = 241.7f;
-
-
-            result[0] = _connect.WriteBit(1001, 0, 4, true);
-            result[1] = _connect.WriteByte(1001, 1, 255);
-            result[2] = _connect.WriteRealData(1001, 2, test);
-            result[3] = _connect.WriteString(1001, 6, "#Test03", 50);
-            
-        }
-        _connect.disconnectPLc();
-        #endif
-
-
-        List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
-        
-        #if SWITCH
-        #region  SWITCH
-        switch (choseOption.ToString())
-        {
-            case "A":
-                // This is public Function from class [ReadXML]
-                askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          
-                break;
-
-            case "Ad":
-                // This is public Function from class [ReadXML]
-                askThread = _readXML.GetVar_1LevelInThreadp(stepId, attributeName, nameThread);
-                break;
-
-            case "Al":
-                // This is public Function from class [ReadXML]
-                askThread = _readXML.GetVar_2LevelInThreadp(stepId, attributeName, nameThread);
-                break;
-
-            case "T":
-                // Test only 
-                askThread  = _readXML.StepNUMp(nameThread);
-                Console.WriteLine($"Number of all steps: {askThread.Count}");
-                break;
-
-            case "I":
-                var result = _readXML.AllInfoXMLp(nameThread);
-                Console.WriteLine($"INFO:{result.ToString()}");
-                break;
-
-            default:
-                Console.WriteLine("Not chose ...");
-                break;
-        }
-       
-        // I check function [askThread = _readXML.GetVarInThreadp(attributeName, nameThread);]
-        if (askThread.Count > 0)                                                    
-        {
-            //Console.WriteLine($"{askThread[0]}");
-
-            //int numberOfId = askThread.Count;
-            //  for(var i = 0; i < numberOfId;)
-            //  {
-            //     Console.WriteLine($"{i}:{askThread[i]}");
-            //     i++;
-            //  }
-
-            foreach (string _item in askThread)
+            if (args.Length < 3)
             {
-                Console.WriteLine(_item);
-            }
-        }
-        #endregion
-        #endif
+                Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
+                Console.WriteLine("[A] -> [A WKOBit CSC 0] and [A 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260 x x]"); // We can check a all information
+                Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
+                Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
 
-        #region Test Method
+                Console.WriteLine("[T] -> [T x CSC x ]");
+                Console.WriteLine("[I] -> [I x CSC x ]");
+
+                return;
+            }
+
+            string choseOption = args[0];           // Command-line argument, e.g., A - Find Variable for Argument [A WKOBit/up CSC 0]
+                                                    //                              B - Find Variabel for 1 Level  [Ad EFASDatablock TRC 1] 
+            string attributeName = args[1];         // Command-line argument, e.g., WKOBit
+            string nameThread = args[2];            // Command-line argument, e.g., CSC CRC TRC OPE
+            string stepId = args[3];                // Command-line argument, e.g., 1     // int stepId = int.Parse(args[3]); //
+            #endregion
+            
+            #region INSTANCEs
+
+            //ExampledbData myDataInToDB = new ExampledbData();
+            //myDataInToDB.makeTestData();
+
+            #if DB
+            // https://learn.microsoft.com/pl-pl/dotnet/csharp/linq/get-started/walkthrough-writing-queries-linq
+            using (var context = new DsmDbConntext())
+            {
+                context.Database.EnsureCreated();
+
+                // var my_m = context.dbModels
+                //     .Where(x => x.ModelCode == "2")
+                //     .Select(x => x.NumberOfModels)
+                //     .ToList();
+                
+                // var my_c = context.dbComps
+                //     .Where(x => x.NumberOfModel == "2")
+                //     .Select(x => x.CompCode)
+                //     .ToList();
+
+                // string? dmc = "8002";
+
+                // var numberOfmodelFromDB = context.dbModels
+                //         .Where(x => x.NumberOfModels == dmc)
+                //         .Select(x => x.ModelCode)
+                //         .ToList();
+
+            //    foreach (var model in my_m)
+            //    {
+            //     foreach(var comp in my_c)
+            //     {
+            //         Console.WriteLine($"COMP: {comp}");
+            //     }
+            //     Console.WriteLine($"MODEL: {model}");
+            //    }
+
+            //    foreach (var numbers in numberOfmodelFromDB){
+            //         Console.WriteLine($"#:{numbers}");
+            //     }
+
+                //dbContext.SaveChanges();
+
+            }
+            #endif
+            
+            //ReadXML _readXML = new ReadXML("myX.xml");
+            //S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5 
+
+            
+            XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
+
+            _timer = new System.Threading.Timer(OnTimedEvent, myCSC, 0, 1000);
+
+            // TIMER CallBack
+            void OnTimedEvent(object state)
+            {
+                var myCSC = (XThread)state;
+                try
+                {
+                    //var result  = myCSC.IsAlive("101", "0", "0");      
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Stack trace: {ex.StackTrace}|{ex.Message}");
+                }
+            }
+      
+            while (true)
+            {   
+                Console.WriteLine("Machines cycle is launch ...");
+
+                var status_ak  = myCSC.IsAlive("101", "0", "0");
+                Console.WriteLine($"STATUS_AK:{status_ak}");
+
+                var status_csc = myCSC.CSC_thread();
+                Console.WriteLine($"STATUS_CSC:{status_csc}");
+            
+                Thread.Sleep(1000);      
+            }
+            
+
+            #endregion
+
+            #if PLC
+            var testConnect = _connect.connectPLc();
+
+            if(testConnect == true)
+            {
+                //float realValue = _connect.ReadRealData(1, 0); // DB1, start at DBD0
+                //string text = _connect.ReadString(1001, 6, 50); // DB1, start at DBB0, size 50 bytes
+
+                //Console.WriteLine($"String read from DB1.DBB0: {text}");
+                //Console.WriteLine($"Value read from DB1.DBD0: {realValue}");
+
+            
+                // int userValue;
+                // string input = Console.ReadLine();
+                // int.TryParse(input, out userValue);
+
+                // ConsoleKeyInfo keyInfo;
+                // do{
+                //     keyInfo = Console.ReadKey(intercept: true);
+                // }
+                // while (keyInfo.Key != ConsoleKey.Enter);
+            
+                // var key = Console.ReadKey();
+                // float keyInt = (float)key.KeyChar;
+
+                bool[] result = new bool[10];
+                float test = 241.7f;
+
+
+                result[0] = _connect.WriteBit(1001, 0, 4, true);
+                result[1] = _connect.WriteByte(1001, 1, 255);
+                result[2] = _connect.WriteRealData(1001, 2, test);
+                result[3] = _connect.WriteString(1001, 6, "#Test03", 50);
+                
+            }
+            _connect.disconnectPLc();
+            #endif
+
+
+            List<string> askThread = new List<string>();                                     // <--- return data from function //DEBUG
+            
+            #if SWITCH
+            #region  SWITCH
+            switch (choseOption.ToString())
+            {
+                case "A":
+                    // This is public Function from class [ReadXML]
+                    askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          
+                    break;
+
+                case "Ad":
+                    // This is public Function from class [ReadXML]
+                    askThread = _readXML.GetVar_1LevelInThreadp(stepId, attributeName, nameThread);
+                    break;
+
+                case "Al":
+                    // This is public Function from class [ReadXML]
+                    askThread = _readXML.GetVar_2LevelInThreadp(stepId, attributeName, nameThread);
+                    break;
+
+                case "T":
+                    // Test only 
+                    askThread  = _readXML.StepNUMp(nameThread);
+                    Console.WriteLine($"Number of all steps: {askThread.Count}");
+                    break;
+
+                case "I":
+                    var result = _readXML.AllInfoXMLp(nameThread);
+                    Console.WriteLine($"INFO:{result.ToString()}");
+                    break;
+
+                default:
+                    Console.WriteLine("Not chose ...");
+                    break;
+            }
+        
+            // I check function [askThread = _readXML.GetVarInThreadp(attributeName, nameThread);]
+            if (askThread.Count > 0)                                                    
+            {
+                //Console.WriteLine($"{askThread[0]}");
+
+                //int numberOfId = askThread.Count;
+                //  for(var i = 0; i < numberOfId;)
+                //  {
+                //     Console.WriteLine($"{i}:{askThread[i]}");
+                //     i++;
+                //  }
+
+                foreach (string _item in askThread)
+                {
+                    Console.WriteLine(_item);
+                }
+            }
+            #endregion
+            #endif
+
+            #region Test Method
         #endregion
         }
+
+        #region  STATIC METHODS
+        private static void CallBackTimer()
+        {
+            bool sBit = false;
+            sBit = sBit == true ? false : true;
+        }
+        #endregion
     }
 }
 #endregion

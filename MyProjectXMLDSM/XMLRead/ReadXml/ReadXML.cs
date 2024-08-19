@@ -55,37 +55,37 @@ namespace readxmlFile
     {   
         #region Private Variables
 
-        readonly private string _threadName;        // Name Thread
-        readonly private int _aCKDatablock;         // e.g. ACK DB1002.DBX0.0
-        readonly private int _aCKByte;
-        private int _aCKBit;
+        // readonly private string _threadName;        // Name Thread
+        // readonly private int _aCKDatablock;         // e.g. ACK DB1002.DBX0.0
+        // readonly private int _aCKByte;
+        // private int _aCKBit;
 
-        readonly private int _rEQDatablock;           // e.g. REQ DB1002.DBX0.1
-        readonly private int _rEQByte;           
-        readonly private int _rEQBit;
+        // readonly private int _rEQDatablock;           // e.g. REQ DB1002.DBX0.1
+        // readonly private int _rEQByte;           
+        // readonly private int _rEQBit;
 
-        readonly private int _dMCDatablock;           // e.g. DMC DB1002.DBX1 
-        readonly private int _dMCStartByte;
-        readonly private int _dMCLenght;
+        // readonly private int _dMCDatablock;           // e.g. DMC DB1002.DBX1 
+        // readonly private int _dMCStartByte;
+        // readonly private int _dMCLenght;
 
-        readonly private int _modelDatablock;         // e.g. ModelDataBlock DB1003
-        readonly private int _modelByte;
+        // readonly private int _modelDatablock;         // e.g. ModelDataBlock DB1003
+        // readonly private int _modelByte;
 
-        readonly private int _outModelDatablock;      // not use 
-        readonly private int _outModelByte;
+        // readonly private int _outModelDatablock;      // not use 
+        // readonly private int _outModelByte;
 
-        readonly private int _wOKDatablock;           // e.g. WOK DB1004.DBX0.0
-        readonly private int _wOKByte;
-        readonly private int _wOKBit;
+        // readonly private int _wOKDatablock;           // e.g. WOK DB1004.DBX0.0
+        // readonly private int _wOKByte;
+        // readonly private int _wOKBit;
 
-        readonly private int _wKODatablock;           // e.g. WKO DB1005.DBX0.1
-        readonly private int _wKOByte;
-        readonly private int _wKOBit;
+        // readonly private int _wKODatablock;           // e.g. WKO DB1005.DBX0.1
+        // readonly private int _wKOByte;
+        // readonly private int _wKOBit;
 
-        readonly private int _workResultDatablock;    // e.g. WR DB1006.DB0
-        readonly private int _workResultByte;
+        // readonly private int _workResultDatablock;    // e.g. WR DB1006.DB0
+        // readonly private int _workResultByte;
 
-        readonly private int _numberOfSteps;          // Number of step per cycle
+        // readonly private int _numberOfSteps;          // Number of step per cycle
 
         readonly private string _currentDirectory;    // make path for files.xml 
         readonly private string _currentFilePath;

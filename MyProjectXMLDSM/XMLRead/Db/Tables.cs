@@ -22,21 +22,25 @@ namespace Dsmdb
     {
         public int Id { get; set;}
         public string? OPxxx { get; set; }
-        public string? Model_ECE { get; set; }
-        public string? Model_UK {get; set;}
+        public string? Model_1 { get; set; }
+        public string? Model_2 {get; set;}
     }
 
     public class dbEFAS_P
     {
         public int Id { get; set;}
         public string? DMC { get; set;}
+        public string? EFAS { get; set; }
         public string? OPxxx {get; set; }
+        public int NoSeq { get; set; }
+        public int Rew {get; set;}
     }
 
     public class dbESTRC_A
     {
         public int Id { get; set;}
         public string? DMC {get; set;}
-        public string? OPxx {get; set; }
+        public string? ESTRC {get; set;}
+        public string? OPxxx {get; set; }
     }
 }

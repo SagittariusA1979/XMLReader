@@ -1,3 +1,18 @@
+<SQL----------------------------------------------------->On the path "C:\Users\host\Documents"
+
+   sqlite> .headers on
+   sqlite> .mode column
+
+   .tables
+   .schema
+
+   sqlite> SELECT * FROM users;
+
+   PRAGMA table_info(dbEFAS_Ps);
+</SQL--------------------------------------------------->
+
+
+
 <dotnetInformation>
 
    dotnet add package Microsoft.EntityFrameworkCore.SqlServer

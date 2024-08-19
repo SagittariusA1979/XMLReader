@@ -57,8 +57,15 @@ namespace s7
         #region Method's       
         public bool connectPLc()
         {
-            var result = _client.ConnectTo(_ipAddress, _rack, _slot);
-            return result == 0;
+            try
+            {
+                var _res = _client.ConnectTo(_ipAddress, _rack, _slot);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Issue whit PLC connect: {ex.Message}|{ex.StackTrace}");
+            }
+            return true;
         }
         public int disconnectPLc()
         {
