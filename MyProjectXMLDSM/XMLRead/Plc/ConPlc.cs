@@ -54,7 +54,8 @@ namespace s7
             _rack = rack;
         }
 
-        #region Method's       
+        
+        #region Connec_ON_OFF       
         public bool connectPLc()
         {
             try
@@ -71,8 +72,9 @@ namespace s7
         {
             return _client.Disconnect();
         }
+        #endregion
 
-        // Read value from PLC
+        #region Read_value_from_PLC
         public bool ReadBit(int dbNumber, int byteIndex, int bitIndex)
         {
             byte[] buffer = new byte[1]; // We only need to read 1 byte
@@ -154,8 +156,26 @@ namespace s7
                 throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
             }
         }
+        public DateTime DBReadDTL(int dbNumber, int start)
+        {
+            //DateTime redlt = DateTime.MinValue;
+            byte[] buffer = new byte[12];
 
-         // Write value to PLC 
+            int result = _client.DBRead(dbNumber, start, 12, buffer);
+
+            if(result == 0)
+            {
+                DateTime redlt = ParseDTL(buffer);
+                return redlt;
+            }
+            else
+            {
+                throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
+            }
+        }
+        #endregion
+
+        #region Write_value _to _PLC 
         public bool WriteBit(int dbNumber, int byteIndex, int bitIndex, bool value)
         {
         
@@ -256,8 +276,25 @@ namespace s7
             }
             return true;
         }
+        #endregion
 
+        #region Support_functions
+        private DateTime ParseDTL(byte[] buffer)
+        {
+            int year = (buffer[0] << 8) + buffer[1];
+            int month = buffer[2];
+            int day = buffer[3];
+            int hour = buffer[4];
+            int minute = buffer[5];
+            int second = buffer[6];
+            int millisecond = (buffer[7] << 8) + buffer[8];
+            // Day of the week is in buffer[9], but not used here
 
+            return new DateTime(year, month, day, hour, minute, second, millisecond);
+        }
+        #endregion
+
+        #region DEbug_
         #if DEBUG // Debug only
         public float[] ReadRealDataV01(int dbNumber, int start, int count)
         {

@@ -15,6 +15,8 @@
 
 <dotnetInformation>
 
+   dotnet add package System.Data.SqlClient
+   
    dotnet add package Microsoft.EntityFrameworkCore.SqlServer
    dotnet add package Microsoft.EntityFrameworkCore.Sqlite
    dotnet add package Microsoft.EntityFrameworkCore.Tools

@@ -188,7 +188,7 @@ namespace readxmlFile
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"[GetVarInThread] Error: {ex.Message}");
             }
             return list_data;
         }

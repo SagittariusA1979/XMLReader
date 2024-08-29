@@ -17,7 +17,9 @@ using CSC;
 using readxmlFile;
 using Dsmdb;
 using s7;
+using sqleasy;
 using System.Data.Common;
+using support;
 
 
 
@@ -105,10 +107,10 @@ namespace DSMTester
             //ReadXML _readXML = new ReadXML("myX.xml");
             //S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5 
 
-            
-            XThread myCSC = new XThread("myX.xml", "192.168.1.5", 0, 1);
+            SqlDi controlsOp770 = new SqlDi("#","#","#");
+            XThread myOpCycle = new XThread("myX.xml", "192.168.1.5", 0, 1);
 
-            _timer = new System.Threading.Timer(OnTimedEvent, myCSC, 0, 1000);
+            _timer = new System.Threading.Timer(OnTimedEvent,  myOpCycle, 0, 1000);
 
             // TIMER CallBack
             void OnTimedEvent(object state)
@@ -116,7 +118,7 @@ namespace DSMTester
                 var myCSC = (XThread)state;
                 try
                 {
-                    //var result  = myCSC.IsAlive("101", "0", "0");      
+                    //var result  =  myOpCycle.IsAlive("101", "0", "0");      
                 }
                 catch (Exception ex)
                 {
@@ -128,11 +130,17 @@ namespace DSMTester
             {   
                 Console.WriteLine("Machines cycle is launch ...");
 
-                var status_ak  = myCSC.IsAlive("101", "0", "0");
+                var status_ak  =  myOpCycle.IsAlive("101", "0", "0");
                 Console.WriteLine($"STATUS_AK:{status_ak}");
 
-                var status_csc = myCSC.CSC_thread();
+                var status_csc =  myOpCycle.CSC_thread();
                 Console.WriteLine($"STATUS_CSC:{status_csc}");
+
+                var status_trc = myOpCycle.TRC_thread();
+                Console.WriteLine($"STATUS_TRC :{status_trc}");
+
+                // reading test from sqldb
+                controlsOp770.csCValidFromSQL();
             
                 Thread.Sleep(1000);      
             }
