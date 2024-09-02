@@ -11,7 +11,68 @@
    PRAGMA table_info(dbEFAS_Ps);
 </SQL--------------------------------------------------->
 
+<EmptyOrNullString>
+   In your code, you're assigning the result of a LINQ query to `numberOfModelFromDB`, which is initially declared as `List<string>?`. The warning arises because the result of the query (`numberOfModelFromDB_`) is of type `List<string?>`, meaning it might contain `null` values. This type does not match `List<string>`, which does not allow `null` elements.
 
+   Here’s how you can correct it:
+
+   ### 1. **Change the Type to Match the Result**:
+   If you expect that the query might return `null` values in `ModelCode`, you should declare `numberOfModelFromDB` as `List<string?>` to accommodate possible `null` values:
+
+   ```csharp
+   List<string?>? numberOfModelFromDB = new List<string?>(); 
+   var numberOfModelFromDB_ = context.dbModels
+                              .Where(x => x.NumberOfModels == c_dmc)
+                              .Select(x => x.ModelCode)
+                              .ToList();
+   numberOfModelFromDB = numberOfModelFromDB_;
+   ```
+
+   ### 2. **Filter Out `null` Values**:
+   If you want to ensure that `numberOfModelFromDB` contains only non-null `string` values, you can filter out the `null` values from the query result:
+
+   ```csharp
+   List<string>? numberOfModelFromDB = new List<string>(); 
+   var numberOfModelFromDB_ = context.dbModels
+                              .Where(x => x.NumberOfModels == c_dmc)
+                              .Select(x => x.ModelCode)
+                              .Where(x => x != null) // Filter out nulls
+                              .Cast<string>() // Safely cast from string? to string
+                              .ToList();
+   numberOfModelFromDB = numberOfModelFromDB_;
+   ```
+
+   ### 3. **Replace `null` with a Default Value**:
+   Alternatively, if you want to replace any `null` values with a default string, you can do so like this:
+
+   ```csharp
+   List<string>? numberOfModelFromDB = new List<string>(); 
+   var numberOfModelFromDB_ = context.dbModels
+                              .Where(x => x.NumberOfModels == c_dmc)
+                              .Select(x => x.ModelCode ?? "DefaultModelCode") // Replace nulls
+                              .ToList();
+   numberOfModelFromDB = numberOfModelFromDB_;
+   ```
+
+   ### 4. **Handle `null` Lists**:
+   If `numberOfModelFromDB_` might be `null` itself, you should handle this case too:
+
+   ```csharp
+   List<string>? numberOfModelFromDB = context.dbModels
+                              .Where(x => x.NumberOfModels == c_dmc)
+                              .Select(x => x.ModelCode)
+                              .Where(x => x != null) // Filter out nulls
+                              .Cast<string>() // Safely cast from string? to string
+                              .ToList() ?? new List<string>(); // Handle null list
+   ```
+
+   ### Summary
+   - **Use `List<string?>`**: If you need to allow `null` values in the list.
+   - **Filter out `null` values**: If you need a `List<string>` with non-null values.
+   - **Replace `null` with a default value**: If you need a non-nullable list and want to substitute `null` with a specific string.
+
+   Choose the approach that best fits your application's logic and data requirements.
+</>
 
 <dotnetInformation>
 

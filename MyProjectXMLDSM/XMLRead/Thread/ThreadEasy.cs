@@ -58,13 +58,13 @@ namespace support
         private S7con mS7con;
         #endregion 
 
-        private int steps;
+        private int stepsCSC;
        
         public EThread(string fileName, string IpAddres, int slot, int rack)
         {
             mReadXML = new ReadXML(fileName);
             mS7con = new S7con(IpAddres, slot, rack);
-            steps = 0; 
+            stepsCSC = 0; 
 
         }        
 
@@ -98,7 +98,7 @@ namespace support
                 Console.WriteLine($"Error [IsAlive] --> isConnect: {isConnect} | {ex.Message}");
                 return false;
             }
-            return true;
+            return KeepALive;
         }
         public bool Print_DataMatric(string NoDmc)
         {
@@ -121,60 +121,57 @@ namespace support
             List<string>? numberOfModelFromDB = new List<string>();
             List<string>? nameOfModelFromDB = new List<string>();
 
-            bool status_csc = false;    // Basicly ststus for function
-            bool resultDB = false;      // Result from check 1 (DMC=OK, mdel=OK ) and 2 (OPxx is exist curent Model)
-            int model = 0;              // Model    refer DSM           r:327
-            string dmc = string.Empty;                 // dmc      refer DSM           r:326
-            bool dmc_Check = true;      // convert dms                  r:318
-            string currentOPName = "OPxxx"; // Get OP name e.g. OP700   r:350
-            string NoSeq = string.Empty;    // Number in sequence [if 0 that mean not exist] r:369
-            List<string>? curentOpEFAS = new List<string>(); // EFAS for current OPxxx r:489
-
-            //int steps = 0;
+            bool status_csc = false;    
+            bool resultDB = false;      
+            int model = 0;              
+            string dmc = string.Empty;                 
+            bool dmc_Check = true;      
+            string currentOPName = "OPxxx"; 
+            string NoSeq = string.Empty;    
+            List<string>? curentOpEFAS = new List<string>(); 
             #endregion
 
-            bool REQ = REQ_Read("CSC"); // Start csc thread <--
+            currentOPName = OpName_Read();
+            bool REQ = REQ_Read("CSC"); 
             
             #if SHOWCSC
-            Console.WriteLine($"--> START THREAD CSC : REQ: {REQ}");
+            Console.WriteLine($"--> START THREAD CSC FOR stNo:[{currentOPName}] : REQ: {REQ}");
             #endif
 
-            if (REQ && (steps == 0)){   // Step [0] thread <-- We are waiting to REQ from PLC
+            if (REQ && (stepsCSC == 0))            // Step [0] Start thread <-- We are waiting to REQ from PLC
+            {
                 dmc = DMC_Read();
                 model = MOD_Read("CSC");
                 
                 if(string.IsNullOrEmpty(dmc))
                 {
                     dmc_Check = false;
-                    RES_Write(16, "CSC"); // Invalid model code
-                    steps = 4;
+                    RES_Write(16, "CSC"); 
+                    stepsCSC = 4;
                 }
                 else
                 {
-                    steps++;
+                    stepsCSC++;
                 }
                 
                 #if SHOWCSC
-                Console.WriteLine($"REQ is True -> dms:{dmc} dmc_Check:{dmc_Check} model:{model} S:{steps}");
+                Console.WriteLine($"REQ is True -> dms:{dmc} dmc_Check:{dmc_Check} model:{model} S:{stepsCSC}");
                 #endif
             }
 
-            if(REQ && (steps == 1))     // Step [1] thread <-- We looking for a DMC and refer it to number of model
+            if(REQ && (stepsCSC == 1))             // Step [1] thread <-- We looking for a DMC and refer it to number of model
             {
-                // DB context operation [We looking for a DMC and refer it to number of model] <--------
                 using (var context = new DsmDbConntext())
                 {
                     try
                     {
                         context.Database.EnsureCreated();
 
-                        string c_dmc = NoPart(dmc, 1, 4); // Convert NoDMC to model patern e.g. 8002 
+                        string c_dmc = NoPart(dmc, 1, 4); // Convert NoDMC to model patern e.g. 8002 this place I define a paterm for DMC
 
                         #if SHOWCSC
                         Console.WriteLine($"Before convert:{dmc} | Afeter convert: {c_dmc}");
                         #endif
-
-                        currentOPName = OpName_Read();
 
                         var numberOfModelFromDB_ = context.dbModels // e.g [2]
                             .Where(x => x.NumberOfModels == c_dmc)
@@ -202,11 +199,13 @@ namespace support
                     }
                     
                     #if SHOWCSC
-                    Console.WriteLine($"OPxxx:                                  :{currentOPName}");
-                    Console.WriteLine($"Query result from search                :{dmc}");
+                    
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->>  DMC:{dmc} MODEL:{model} dmc_Check:{dmc_Check}");
+                    Console.WriteLine("-----------------------------------------------------------------------------------------------------");
                     Console.WriteLine($"Correcy of numberOfModelFromDB          :{numberOfModelFromDB[0]}   -> Instance: {numberOfModelFromDB.Count}");
                     Console.WriteLine($"nameOfModelFromDB:                      :{nameOfModelFromDB[0]}     -> Instance: {nameOfModelFromDB.Count}");
                     Console.WriteLine($"OpExistInThisModel:                     :{NoSeq}");
+                    Console.WriteLine("-----------------------------------------------------------------------------------------------------");
                     #endif
 
                     try
@@ -248,8 +247,8 @@ namespace support
                     // resultDB = numberOfModelFromDB.Contains(c_dmc.ToString());
     
                     #if SHOWCSC
-                    Console.WriteLine("Result from check 1 (DMC=OK, mdel=OK ) and 2 (OPxx is exist curent Model)");  
-                    Console.WriteLine($"resultDB: {resultDB} STEP: {steps} ");
+                    Console.WriteLine("Result from quality [three controls] (DMC=OK, mdel=OK ) and (OPxx is exist curent Model) and (empty or null the DMC)");
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} -> resultDB: {resultDB}");
                     #endif  
 
                     }
@@ -259,14 +258,14 @@ namespace support
 
                     }  
                 }
-                steps++;
+                stepsCSC++;
             }
 
-            if(REQ && (steps == 2))     // Step [2] thread <-- We have a result [true] from compare No model bettwen DMC code & Opxx exists in the current Model
+            if(REQ && (stepsCSC == 2))     // Step [2] thread <-- We have a result [true] from compare No model bettwen DMC code & Opxx exists in the current Model
             {
 
                 #if SHOWCSC
-                Console.WriteLine($"REQ:{REQ} STEP:{steps} ");
+                Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->>");
                 #endif
 
                 if(resultDB == true){  // Step [2] thread | RESULT : [true] <--
@@ -285,9 +284,9 @@ namespace support
                     //     ACK_Write(true, "CSC");  // and Error handling (!)
                     // }
 
-                    #if SHOWCSC
-                    Console.WriteLine($"ResultDB TRUE - STEP :{steps}");
-                    #endif
+                    // #if SHOWCSC
+                    // Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->> DMC:{dmc} resultFromSQLdb:{resultFromSQLdb}");
+                    // #endif
                 }
 
                 if(resultDB == false){ // Step [2] thread | RESULT : [false] <--
@@ -297,29 +296,34 @@ namespace support
                     ACK_Write(true, "CSC");
                    
                     #if SHOWCSC
-                    Console.WriteLine($"ResultDB FALSE - STEP :{steps}");
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->>");
                     #endif
                 }
-                steps++;
+                stepsCSC++;
             }
 
-            if(REQ && (steps == 4)) // When We have a error from quality check DMC and NoModel
+            if(REQ && (stepsCSC == 4)) // When We have a error from quality check DMC and NoModel
             {
                 WKO_Write(true, "CSC");
                 RES_Write(16, "CSC");
 
                 ACK_Write(true, "CSC");
-                steps = 3;
+                stepsCSC = 3;
+
+                #if SHOWCSC
+                Console.WriteLine($"We have a error from quality check DMC and Number of Model.");
+                Console.WriteLine($" WKO: 1 RES: 16 ACK: 1");
+                #endif
             }
 
-            if (REQ != true && (steps == 3))
+            if (REQ != true && (stepsCSC == 3))
             {
                     ACK_Write(false, "CSC"); // and Error handling (!)
                     status_csc = true;
-                    steps = 0;
+                    stepsCSC = 0;
 
                     #if SHOWCSC
-                    Console.WriteLine($"STEP :{steps} <--(FINISH CSC)");
+                    Console.WriteLine($"STEP :{stepsCSC} <--(FINISH CSC)");
                     #endif
             } 
             return status_csc;

@@ -35,7 +35,6 @@ using SQLitePCL;
 using Microsoft.EntityFrameworkCore.Sqlite.Query.Internal;
 using System.Xml.Schema;
 
-
 namespace CSC 
 {
     public class XThread 
@@ -77,138 +76,11 @@ namespace CSC
             //     Console.WriteLine("Byte_efas: " + step.Byte_efas);
             // }
         }
-        // public class ModelInfo                      // ClassData I use to .Sekect(x => new ...)
+        // public class ModelInfo                   // ClassData I use to .Sekect(x => new ...)
         // {
         //     public string Model_1 { get; set; }
         //     public string Model_2 { get; set; }
         // }
-        #endregion
-        #region Get/Set
-    //     public string ThreadName
-    //     {
-    //         get{ return _threadName; }
-    //         set{ _threadName = value; }
-    //     }
-
-    //     public int ACKDatablock 
-    //     {
-    //         get{ return _aCKDatablock;}
-    //         set{ _aCKDatablock = value;}
-    //     }
-    //     public int ACKByte
-    //     {
-    //         get{ return _aCKByte;}
-    //         set{ _aCKByte = value;}
-    //     }
-    //     public int ACKBBit
-    //     {
-    //         get{ return _aCKBit; }
-    //         set{ _aCKBit = value;}
-    //     }
-
-    //     public int REQDatablock
-    //     {
-    //         get{ return _rEQDatablock; } 
-    //         set { _rEQDatablock = value;}
-    //     }
-    //     public int REQByte
-    //     {
-    //         get{ return _rEQByte; }
-    //         set{ _rEQByte = value; }  
-    //     }           
-    //     public int REQBit
-    //     {
-    //         get { return _rEQBit; }
-    //         set { _rEQBit = value; }
-    //     }
-
-    //     public int DMCDatablock
-    //     {
-    //         get{ return _dMCDatablock;}
-    //         set { _dMCDatablock = value;}
-    //     }         
-    //     public int DMCStartByte
-    //     {
-    //         get{ return  _dMCStartByte;}
-    //         set { _dMCStartByte = value;}
-    //     }
-    //     public int DMCLenght
-    //     {
-    //         get{return _dMCLenght; }
-    //         set { _dMCLenght = value;}
-    //     }
-
-    //     public int ModelDatablock
-    //     {
-    //         get{ return _modelDatablock; }
-    //         set { _modelDatablock = value;}
-    //     }         
-    //     public int ModelByte
-    //     {
-    //         get{ return _modelByte; }
-    //         set{ _modelByte = value;}
-    //     }
-
-    //     public int OutModelDatablock
-    //     {
-    //         get{ return _outModelDatablock;}
-    //         set{ _outModelDatablock = value;}
-    //     }     
-    //    public int OutModelByte
-    //    {
-    //         get{ return _outModelByte; }
-    //         set{_outModelByte = value;} 
-    //    }
-
-    //     public int WOKDatablock
-    //     {
-    //         get{ return _wOKDatablock;} 
-    //         set{_wOKDatablock = value;}
-    //     }          
-    //     public int WOKByte
-    //     {
-    //         get{ return _wOKByte;}
-    //         set{ _wOKByte = value;}
-    //     }
-    //     public int WOKBit
-    //     {
-    //         get{ return _wOKBit;}
-    //         set{ _wOKBit = value;}
-    //     }
-
-    //     public int WKODatablock
-    //     {
-    //         get{ return _wKODatablock;}
-    //         set {_wKODatablock = value;}
-    //     }           
-    //     public int WKOByte
-    //     {
-    //         get{ return _wKOByte;}
-    //         set{ _wKOByte = value;}
-    //     }
-    //     public int WKOBit
-    //     {
-    //         get { return _wKOBit;}
-    //         set{ _wKOBit = value;}
-    //     }
-
-    //     public int WorkResultDatablock
-    //     {
-    //         get{ return _workResultDatablock;}
-    //         set{ _workResultDatablock = value;}
-    //     }    
-    //     public int WorkResultByte
-    //     {
-    //         get{return _workResultByte;}
-    //         set{_workResultByte = value;}
-    //     }
-
-    //     public int NumberOfSteps
-    //     {
-    //         get{ return _numberOfSteps;}
-    //         set{ _numberOfSteps = value;}
-    //     }  
-
         #endregion
         #region INSTANCE
         private ReadXML mReadXML;
@@ -259,7 +131,7 @@ namespace CSC
                 Console.WriteLine($"Error [IsAlive] --> isConnect: {isConnect} | {ex.Message}");
                 return false;
             }
-            return true;
+            return KeepALive;
         }
         public bool Print_DataMatric(string NoDmc)
         {
@@ -279,44 +151,50 @@ namespace CSC
             #endregion
 
             #region VARIABELS
-            List<string>? numberOfModelFromDB = new List<string>();
+            List<string>? numberOfModelFromDB = new List<string>(); //List<string?>? numberOfModelFromDB = new List<string?>();
             List<string>? nameOfModelFromDB = new List<string>();
 
             bool status_csc = false;    // Basicly ststus for function
             bool resultDB = false;      // Result from check 1 (DMC=OK, mdel=OK ) and 2 (OPxx is exist curent Model)
-            int model = 0;              // Model    refer DSM           r:327
-            string dmc  = string.Empty; // dmc      refer DSM           r:326
-            bool dmc_Check = true;      // convert dms                  r:318
-            string currentOPName = "OPxxx"; // Get OP name e.g. OP700   r:350
-            string NoSeq = string.Empty;    // Number in sequence [if 0 that mean not exist] r:369
-            List<string>? curentOpEFAS = new List<string>(); // EFAS for current OPxxx r:489
+            int model = 0;              // Model    refer DSM           r:327   up date after all change !!!
+            string dmc  = string.Empty; // dmc      refer DSM           r:326   up date after all change !!!
+            bool dmc_Check = true;      // convert dms                  r:318   up date after all change !!!
+            string currentOPName = "OPxxx"; // Get OP name e.g. OP700   r:172   up date after all change !!!
+            string NoSeq = string.Empty;    // Number in sequence [if 0 that mean not exist] r:369  up date after all change !!!
+            List<string>? curentOpEFAS = new List<string>(); // EFAS for current OPxxx r:489     up date after all change !!!
 
             //int steps = 0;
             #endregion
 
-            bool REQ = REQ_Read("CSC"); // Start csc thread <--
+            currentOPName = OpName_Read();   // read OP name for CSC
+            bool REQ = REQ_Read("CSC");      // read request CSC
             
             #if SHOWCSC
-            Console.WriteLine($"--> START THREAD CSC FOR Ip[{IpAddres}] : REQ: {REQ}");
+            Console.WriteLine($"--> START THREAD CSC FOR stNo:[{currentOPName}] : REQ: {REQ} S:{stepsCSC}");
             #endif
 
-            if(REQ && (stepsCSC == 0)){     // Step [0] thread <-- We are waiting to REQ from PLC
-                dmc = DMC_Read("CSC");
+            if(REQ && (stepsCSC == 0))      // Step [0] Start thread <-- We are waiting to REQ from PLC
+            {     
+                dmc = DMC_Read("CSC"); 
                 model = MOD_Read("CSC");
-                
-                if(string.IsNullOrEmpty(dmc))
+                string paternDMC = dmc.Length >= 4 ? dmc.Substring(0, 9) : dmc;
+
+                // #if SHOWCSC
+                // plcString(dmc);
+                // #endif
+
+                if(paternDMC.Contains('\0') && dmc[0] == '#') // string.IsNullOrEmpty(dmc) && dmc[0] == '0'
                 {
                     dmc_Check = false;
-                    //stepsCSC = 4;
+                    stepsCSC = 4;
                 }
-                // else
-                // {
-                //     stepsCSC++;
-                // }
-                stepsCSC++;
+                else
+                {
+                    stepsCSC++;
+                }
                 
                 #if SHOWCSC
-                Console.WriteLine($"REQ is True -> dms:{dmc} dmc_Check:{dmc_Check} model:{model} S:{stepsCSC}");
+                Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->>  DMC:{dmc} MODEL:{model} dmc_Check:{dmc_Check}");
                 #endif
             }
 
@@ -329,45 +207,57 @@ namespace CSC
                     {
                         context.Database.EnsureCreated();
 
-                        string c_dmc = NoPart(dmc, 1, 4); // Convert NoDMC to model patern e.g. 8002 
+                        string c_dmc = NoPart(dmc, 1, 4); // Convert NoDMC to model patern e.g. 8002
+                        
 
                         #if SHOWCSC
                         Console.WriteLine($"Before convert:{dmc} | Afeter convert: {c_dmc}");
                         #endif
 
-                        currentOPName = OpName_Read();
-
                         var numberOfModelFromDB_ = context.dbModels // e.g [2]
                             .Where(x => x.NumberOfModels == c_dmc)
                             .Select(x => x.ModelCode)
+                            .Where(x => x != null)      // Filter out nulls
+                            .Cast<string>()             // Safely cast from string? to string
                             .ToList();
 
                         var nameOfModelFrmaDB_ = context.dbModels // e.g [Model_1]
                             .Where(x => x.NumberOfModels == c_dmc)
                             .Select(x => x.ModelName)
+                            .Where(x => x != null)      // Filter out nulls
+                            .Cast<string>()             // Safely cast from string? to string
                             .ToList();
 
-                        var OpExistInThisModel = context.dbStations // e.g [2 number in sequence]
+                        if(nameOfModelFrmaDB_ != null && nameOfModelFrmaDB_.Count > 0 && nameOfModelFrmaDB_[0] != null)
+                        {
+                            var OpExistInThisModel = context.dbStations // e.g [2 number in sequence]
                             .Where(x => x.OPxxx == currentOPName)
-                            .Select(x => EF.Property<string>(x, nameOfModelFrmaDB_[0]))
+                            .Select(x => EF.Property<string>(x, nameOfModelFrmaDB_[0]!)) // Null-forgiving Operator [!] you must apsolut ensuree
                             .ToList();
+
+                            NoSeq = OpExistInThisModel[0];
+                        }
+                        else
+                        {
+                            throw new ArgumentNullException(nameof(nameOfModelFrmaDB_), "The property name list is null or empty.");
+                        }
 
                         numberOfModelFromDB = numberOfModelFromDB_;
                         nameOfModelFromDB = nameOfModelFrmaDB_;
-                        NoSeq = OpExistInThisModel[0];
-
                     }
                     catch(Exception ex)
                     {
-                        throw new Exception($"Error during Step 1 :{ex.Message}");
+                        throw new Exception($"Error during [looking for a DMC and refer it to number of model] Step 1A :{ex.Message}");
                     }
                     
                     #if SHOWCSC
-                    Console.WriteLine($"OPxxx:                                  :{currentOPName}");
-                    Console.WriteLine($"Query result from search                :{dmc}");
+                    
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->>  DMC:{dmc} MODEL:{model} dmc_Check:{dmc_Check}");
+                    Console.WriteLine("-----------------------------------------------------------------------------------------------------");
                     Console.WriteLine($"Correcy of numberOfModelFromDB          :{numberOfModelFromDB[0]}   -> Instance: {numberOfModelFromDB.Count}");
                     Console.WriteLine($"nameOfModelFromDB:                      :{nameOfModelFromDB[0]}     -> Instance: {nameOfModelFromDB.Count}");
                     Console.WriteLine($"OpExistInThisModel:                     :{NoSeq}");
+                    Console.WriteLine("-----------------------------------------------------------------------------------------------------");
                     #endif
 
                     try
@@ -409,14 +299,14 @@ namespace CSC
                     // resultDB = numberOfModelFromDB.Contains(c_dmc.ToString());
     
                     #if SHOWCSC
-                    Console.WriteLine("Result from check 1 (DMC=OK, mdel=OK ) and 2 (OPxx is exist curent Model)");  
-                    Console.WriteLine($"resultDB: {resultDB} STEP: {stepsCSC} ");
-                    #endif  
+                    Console.WriteLine("Result from quality [three controls] (DMC=OK, mdel=OK ) and (OPxx is exist curent Model) and (empty or null the DMC)");
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} -> resultDB: {resultDB}");
+                    #endif
 
                     }
                     catch(Exception ex)
                     {
-                        throw new Exception($"Error during Step 1:{ex.Message}");
+                        throw new Exception($"Error during [Three controls] 1B:{ex.Message}");
 
                     }  
                 }
@@ -427,10 +317,10 @@ namespace CSC
             {
 
                 #if SHOWCSC
-                Console.WriteLine($"REQ:{REQ} STEP:{stepsCSC} ");
+                Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->> START");
                 #endif
 
-                if(resultDB == true){  // Step [2] thread | RESULT : [true] <--
+                if(resultDB == true){  // Step [2] INTYRODUCTION CONTROLS RESULT ARE -> [true] <--
 
                     using(var context = new DsmDbConntext())
                     {
@@ -447,10 +337,10 @@ namespace CSC
                         bool exists = context.dbEFAS_Ps.Any(x => x.DMC == all_dmc); // I looking for into db.EFAS if dmc is exist or not exist [BASIC] 
 
                         #if SHOWCSC
-                        Console.WriteLine($"EXIST:{exists} S:{stepsCSC} DMC:{dmc}");
+                        Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->> DMC:{dmc} exist:{exists}");
                         #endif
 
-                        if(exists) // Exist DMS and OPxxx [2A]
+                        if(exists) // Exist DMS and OPxxx
                         {  
                             bool existsSpecificOP = context.dbEFAS_Ps.Any(x => x.DMC == all_dmc && x.OPxxx == currentOPName); // DMC for OP : Exist or not [SPECIFIC]
 
@@ -474,24 +364,24 @@ namespace CSC
                                     RES_Write(0, "CSC");
                                         
                                     #if SHOWCSC
-                                    Console.WriteLine($"Exist DMS and OPxxx [2A]");
+                                    Console.WriteLine($"Exist DMS and OPxxx EFAS: current WOK: 1 RES: 1");
 
                                     foreach(var item in curentOpEFAS){
                                         Console.WriteLine($"currentOPName: {currentOPName} EFAS: {item}");
                                     }
                                     #endif 
                                 }
-                                else
+                                else // I wondered if removed belowe code regarding -> else{} <-
                                 {
                                     WKO_Write(true, "CSC");
-                                    RES_Write(4, "CSC");
+                                    RES_Write(6, "CSC");
 
                                     #if SHOWCSC
-                                    Console.WriteLine($"EFAS: 2 WOK: 1 RES: 0");
+                                    Console.WriteLine($"EFAS: not change WKO: 1 RES: 6");
                                     #endif
                                 }   
                             }
-                            else   // Exist DMS [2B]
+                            else   // Exist DMS
                             {
                                 // last variables it determines is Exsit for specific (#8002002# and OPxxx) or Basic (#8002002# )
                                 bool Rules_whitout_Op = RulsControl(dmc, NoSeq, false); 
@@ -512,10 +402,10 @@ namespace CSC
                                 else
                                 {
                                     WKO_Write(true, "CSC");
-                                    RES_Write(4, "CSC");
+                                    RES_Write(6, "CSC");
 
                                     #if SHOWCSC
-                                    Console.WriteLine($"EFAS: not chnge WOK: 1 RES: 4");
+                                    Console.WriteLine($"EFAS: not chnge WKO: 1 RES: 6");
                                     #endif
                                 }
                             }
@@ -536,13 +426,13 @@ namespace CSC
                                 Console.WriteLine($"EFAS: 2 WOK: 1 RES: 0");
                                 #endif
                             }
-                            else    // [1B]
+                            else
                             {
                                 WKO_Write(true, "CSC");
                                 RES_Write(5, "CSC");
 
                                 #if SHOWCSC
-                                Console.WriteLine($"EFAS: not change WOK: 1 RES: 5");
+                                Console.WriteLine($"EFAS: not change WKO: 1 RES: 5");
                                 #endif
                             }                      
                         }
@@ -551,7 +441,7 @@ namespace CSC
                     ACK_Write(true, "CSC");  // and Error handling (!)
 
                     #if SHOWCSC
-                    Console.WriteLine($"ResultDB TRUE - STEP :{stepsCSC}");
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->> ResultDB - > TRUE <- after execute");
                     #endif
                 }
                     
@@ -561,14 +451,14 @@ namespace CSC
 
                     ACK_Write(true, "CSC");
                    
-                    #if SHOWCSC
-                    Console.WriteLine($"ResultDB FALSE - STEP :{stepsCSC}");
+                     #if SHOWCSC
+                    Console.WriteLine($"stNo:[{currentOPName}] :REQ: {REQ} :S:{stepsCSC} ->> ResultDB - > FALSE <- after execute");
                     #endif
                 }
                 stepsCSC++;
             }
 
-            if(REQ && (stepsCSC == 4))      // When We have a error from quality check DMC and NoModel
+            if(REQ && (stepsCSC == 4))      // Step [4] When We have a error from quality check DMC and Number of Model. This steps is very iomportant
             {
                 WKO_Write(true, "CSC");
                 RES_Write(16, "CSC");
@@ -576,16 +466,20 @@ namespace CSC
                 ACK_Write(true, "CSC");
                 stepsCSC = 3;
 
+                #if SHOWCSC
+                Console.WriteLine($"We have a error from quality check DMC and Number of Model.");
+                Console.WriteLine($" WKO: 1 RES: 16 ACK: 1");
+                #endif
             }
 
-            if (REQ != true && (stepsCSC == 3))
+            if (REQ != true && (stepsCSC == 3))  // Step [3] Finish thread 
             {
                     ACK_Write(false, "CSC"); // and Error handling (!)
                     status_csc = true;
                     stepsCSC = 0;
 
                     #if SHOWCSC
-                    Console.WriteLine($"STEP :{stepsCSC} <--(FINISH CSC)");
+                    Console.WriteLine($"--> STOP THREAD CSC FOR stNo:[{currentOPName}] : REQ: {REQ}");
                     #endif
             } 
             return status_csc;
@@ -631,7 +525,7 @@ namespace CSC
             if(REQ && (stepsTRC == 0))          // Step [0] thread <-- We are waiting to REQ from PLC
             {
                 dmc = DMC_Read("TRC"); // Read DMC
-                model = MOD_Read("TRC");
+                model = MOD_Read_TRC();
                 
                 if(string.IsNullOrEmpty(dmc) || (model == 0 ))
                 {
@@ -643,10 +537,9 @@ namespace CSC
                 if(dmcAndModel_Check)
                 {
                     // code ... controls
-                    Console.WriteLine($"DMC: {dmc} NoModel: {model}");
-
-                    stepsCSC++; // 1
+                    stepsTRC++; // 1
                 }
+
                 Console.WriteLine($"STEPS :{stepsTRC} DMC: {dmc} NoModel: {model}");
 
             }
@@ -658,14 +551,14 @@ namespace CSC
 
             if(REQ && (stepsTRC == 2))          // When We have succes
             {
-                WOK_Write(true, "TRC");
+                //WOK_Write(true, "TRC");
                 ACK_Write(true, "TRC");
                 stepsTRC = 4;
             }
 
             if(REQ && (stepsTRC == 3))          // When We have a error 
             {
-                WKO_Write(true, "TRC");
+               // WKO_Write(true, "TRC");
                 ACK_Write(true, "TRC");
                 stepsTRC = 4;
             }
@@ -675,6 +568,7 @@ namespace CSC
                 ACK_Write( false, "TRC");
                 stepsTRC = 0;
             }
+            Console.WriteLine($"STEPS :{stepsTRC}");
 
             return cycleStatus;
         }
@@ -770,6 +664,31 @@ namespace CSC
 
                 var DB_model = mReadXML.GetVarInThreadp("ModelDatablock", _thread);
                 var Byte_model = mReadXML.GetVarInThreadp("ModelByte", _thread );
+
+                if((DB_model.Count > 0) && (Byte_model.Count > 0))
+                {
+                    int _modelDatablock = int.Parse(DB_model[0]);
+                    int _modelByte = int.Parse(Byte_model[0]);
+
+                    if(mS7con.connectPLc())
+                    {
+                        int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
+                        returnModel = NModel;
+                    }
+                    else
+                    {
+                        throw new Exception("Not connect to PLC or something alse !");
+                    }
+                    return returnModel;
+                }
+                return returnModel;
+        }
+        private int MOD_Read_TRC()
+            {
+                int returnModel = 0;
+
+                var DB_model = mReadXML.GetVarInThreadp("ModelCodeDatablock", "TRC");
+                var Byte_model = mReadXML.GetVarInThreadp("ModelCodeByte", "TRC" );
 
                 if((DB_model.Count > 0) && (Byte_model.Count > 0))
                 {
@@ -1125,8 +1044,17 @@ namespace CSC
                 throw new Exception($"Error in RulsControl:{ex.Message}");   
             }
         }
+        private void plcString(string dmc_)
+        {
+            int counter = 0;
+
+            foreach(var x in dmc_)
+            {
+                counter++;
+                Console.WriteLine($"index:{counter} --> [{x}]");
+            }
+        }
         
         #endregion
     }
 }
-    

@@ -131,16 +131,16 @@ namespace DSMTester
                 Console.WriteLine("Machines cycle is launch ...");
 
                 var status_ak  =  myOpCycle.IsAlive("101", "0", "0");
-                Console.WriteLine($"STATUS_AK:{status_ak}");
+                Console.WriteLine($"STATUS Keep Alive: {status_ak}");
 
                 var status_csc =  myOpCycle.CSC_thread();
                 Console.WriteLine($"STATUS_CSC:{status_csc}");
 
-                var status_trc = myOpCycle.TRC_thread();
-                Console.WriteLine($"STATUS_TRC :{status_trc}");
+                //var status_trc = myOpCycle.TRC_thread();
+                //Console.WriteLine($"STATUS_TRC :{status_trc}");
 
                 // reading test from sqldb
-                controlsOp770.csCValidFromSQL();
+                //controlsOp770.csCValidFromSQL();
             
                 Thread.Sleep(1000);      
             }
