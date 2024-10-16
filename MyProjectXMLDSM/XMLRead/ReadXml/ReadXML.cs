@@ -238,7 +238,7 @@ namespace readxmlFile
             return list_data;
         }
 
-        private static List<string> GetVar_2LevelInThread(XDocument _doc, string stepId, string attributesName, string  threadName)
+        private static List<string> GetVar_2LevelInThread_notUsed(XDocument _doc, string stepId, string attributesName, string  threadName)
         {
             List<string> list_data = new List<string>();
             
@@ -284,6 +284,94 @@ namespace readxmlFile
             return list_data;
         }
 
+        private static List<string> GetVar_2LevelInThread_StepReferenceModel(XDocument _doc, string stepId, string attributesName, string threadName)
+        {
+            List<string> list_data = new List<string>();
+            
+            try
+            {
+                var convString = StrThr(threadName);
+                var shape = _doc.Descendants().Where(e => e.Name.LocalName == convString);
+
+                foreach (var shapes in shape)
+                {
+                    var attr = shapes.Attribute("AllSteps");
+                    if (attr != null)
+                    {
+                        string attributeValue = attr.Value;
+                        XDocument dipdata = XDocument.Parse(attributeValue);
+                        
+                        var stepModels = dipdata.Descendants("StepModel")
+                                                .Where(e => (string)e.Element("StepId") == stepId);
+                        
+                        foreach (var stepModel in stepModels)
+                        {
+                            var variableIds = stepModel.Descendants("StepReferenceModel")
+                                                    .Select(x => (string)x.Element(attributesName))
+                                                    .Where(x => !string.IsNullOrEmpty(x));
+
+                            list_data.AddRange(variableIds);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Attribute: {attr} does not exist");
+                        return list_data;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+            }
+
+            return list_data;
+        }
+
+        private static List<string> GetVar_2LevelInThread_ComponentReferenceModel(XDocument _doc, string stepId, string attributesName, string threadName)
+        {
+            List<string> list_data = new List<string>();
+            
+            try
+            {
+                var convString = StrThr(threadName);
+                var shape = _doc.Descendants().Where(e => e.Name.LocalName == convString);
+
+                foreach (var shapes in shape)
+                {
+                    var attr = shapes.Attribute("AllSteps");
+                    if (attr != null)
+                    {
+                        string attributeValue = attr.Value;
+                        XDocument dipdata = XDocument.Parse(attributeValue);
+                        
+                        var stepModels = dipdata.Descendants("StepModel")
+                                                .Where(e => (string)e.Element("StepId") == stepId);
+                        
+                        foreach (var stepModel in stepModels)
+                        {
+                            var variableIds = stepModel.Descendants("ComponentReferenceModel")
+                                                    .Select(x => (string)x.Element(attributesName))
+                                                    .Where(x => !string.IsNullOrEmpty(x));
+
+                            list_data.AddRange(variableIds);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Attribute: {attr} does not exist");
+                        return list_data;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+            }
+
+            return list_data;
+        }
+        
         private static List<string> StepNUM(XDocument doc, string threadName)
         {
             List<string> list_data = new List<string>();
@@ -455,12 +543,26 @@ namespace readxmlFile
             return list_data;
         }
 
-        public List<string>GetVar_2LevelInThreadp(string stepId, string attributesName, string  threadName)
+        public List<string>GetVar_2LevelInThreadpSRM(string stepId, string attributesName, string  threadName)
         {
             List<string> list_data = new List<string>();
 
             if(_data != null){
-                list_data = GetVar_2LevelInThread(_data, stepId, attributesName, threadName);
+                list_data = GetVar_2LevelInThread_StepReferenceModel(_data, stepId, attributesName, threadName);
+            }else{
+                Console.WriteLine("Error");
+                return list_data;
+            }
+            return list_data;
+
+        }
+
+        public List<string>GetVar_2LevelInThreadpCRM(string stepId, string attributesName, string  threadName)
+        {
+            List<string> list_data = new List<string>();
+
+            if(_data != null){
+                list_data = GetVar_2LevelInThread_ComponentReferenceModel(_data, stepId, attributesName, threadName);
             }else{
                 Console.WriteLine("Error");
                 return list_data;

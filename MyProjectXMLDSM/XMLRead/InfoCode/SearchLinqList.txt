@@ -82,8 +82,17 @@
    dotnet add package Microsoft.EntityFrameworkCore.Sqlite
    dotnet add package Microsoft.EntityFrameworkCore.Tools
 
+   dotnet add package ZXing.Net
+   dotnet add package ZintNet
+   dotnet add package SixLabors.ImageSharp
+   dotnet add package System.Drawing.Common
+
    dotnet add package Snap7 /https://snap7.sourceforge.net//
    dotnet add package Sharp7
+
+   dotnet list package
+   dotnet restore
+   
  </dotnetInformation>
 
 <gitInformation>
@@ -181,6 +190,55 @@
       if (reqStatus.Value)
 </>
 
+//------
+public class VariableData
+{
+    public List<string> VariableDesc { get; set; }
+    public List<string> SelectedValueType { get; set; }
+    public List<string> TRCDatablock { get; set; }
+    public List<string> TRCStartAddress { get; set; }
+    public List<string> TRCLength { get; set; }
+}
+
+private VariableData VariableDesc_Read(string NoStep)
+{
+    // Validate input and initialize data
+    if (!int.TryParse(NoStep, out int stepNumber) || stepNumber <= 0)
+    {
+        throw new ArgumentException("Invalid step number.");
+    }
+
+    // Create a helper method to avoid repetition
+    List<string> GetXmlData(string noStep, string tag) 
+    {
+        return mReadXML.GetVar_2LevelInThreadpSRM(noStep, tag, "TRC") ?? new List<string>();
+    }
+
+    // Fetch all related data
+    VariableData data = new VariableData
+    {
+        VariableDesc = GetXmlData(NoStep, "VariableDesc"),
+        SelectedValueType = GetXmlData(NoStep, "SelectedValueType"),
+        TRCDatablock = GetXmlData(NoStep, "TRCDatablock"),
+        TRCStartAddress = GetXmlData(NoStep, "TRCStartAddress"),
+        TRCLength = GetXmlData(NoStep, "TRCLenght")
+    };
+
+    return data;
+}
+
+used:
+
+VariableData data = VariableDesc_Read("1");
+
+foreach (var variable in data.VariableDesc)
+{
+    Console.WriteLine(variable);
+}
+
+// Access other fields similarly
+
+//------
 
 
 

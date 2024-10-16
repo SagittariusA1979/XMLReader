@@ -20,6 +20,7 @@ using s7;
 using sqleasy;
 using System.Data.Common;
 using support;
+using dmc;
 
 
 
@@ -42,8 +43,9 @@ namespace DSMTester
             {
                 Console.WriteLine("Please provide command-line arguments Xn Xn Xn");
                 Console.WriteLine("[A] -> [A WKOBit CSC 0] and [A 3c90b0d0-09ec-4f9f-a23e-80ab02d8d260 x x]"); // We can check a all information
-                Console.WriteLine("[Ad]-> [Ad EFASDatablock TRC 1]");
-                Console.WriteLine("[Al]-> [Al TRCDatablock TRC 1]");
+                Console.WriteLine("[S] -> [S EFASDatablock TRC 1]");                                        // <StepModel>
+                Console.WriteLine("[V] -> [V TRCDatablock TRC 1]");                                         // <StepReferenceModel>
+                Console.WriteLine("[C] -> [C TRCDatablock TRC 1]");                                         // <ComponentReferenceMode>
 
                 Console.WriteLine("[T] -> [T x CSC x ]");
                 Console.WriteLine("[I] -> [I x CSC x ]");
@@ -105,10 +107,21 @@ namespace DSMTester
             #endif
             
             //ReadXML _readXML = new ReadXML("myX.xml");
-            //S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5 
+            //S7con _connect = new S7con("192.168.0.55", 0, 1); // 192.168.1.5
+
+            dmcCreate newCode = new dmcCreate();
+            newCode.pngDMc("xxx", "vvv");
+            var var_ = newCode.GenerateZPL("TESt", "asxda");
+            Console.WriteLine(var_);
 
             SqlDi controlsOp770 = new SqlDi("#","#","#");
             XThread myOpCycle = new XThread("myX.xml", "192.168.1.5", 0, 1);
+
+            // We check how many memory are located whit prpgrams
+            int[] largeArray = new int[1000000];
+
+            // GC.Collect();
+            // GC.WaitForPendingFinalizers();
 
             _timer = new System.Threading.Timer(OnTimedEvent,  myOpCycle, 0, 1000);
 
@@ -130,18 +143,27 @@ namespace DSMTester
             {   
                 Console.WriteLine("Machines cycle is launch ...");
 
-                var status_ak  =  myOpCycle.IsAlive("101", "0", "0");
-                Console.WriteLine($"STATUS Keep Alive: {status_ak}");
+                //var status_ak  =  myOpCycle.IsAlive("101", "0", "0");
+                //Console.WriteLine($"STATUS Keep Alive: {status_ak}");
 
-                var status_csc =  myOpCycle.CSC_thread();
-                Console.WriteLine($"STATUS_CSC:{status_csc}");
+                //var status_csc =  myOpCycle.CSC_thread();
+                //Console.WriteLine($"STATUS_CSC:{status_csc}");
 
-                //var status_trc = myOpCycle.TRC_thread();
+                var status_trc = myOpCycle.TRC_thread();
                 //Console.WriteLine($"STATUS_TRC :{status_trc}");
 
                 // reading test from sqldb
                 //controlsOp770.csCValidFromSQL();
-            
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                long memoryUsed = GC.GetTotalMemory(false);
+                Console.WriteLine($"Memory used: {memoryUsed} bytes");
+
+                // Optionally, you can convert it to megabytes for easier reading
+                Console.WriteLine($"Memory used: {memoryUsed / 1024 / 1024} MB");
+
                 Thread.Sleep(1000);      
             }
             
@@ -198,14 +220,19 @@ namespace DSMTester
                     askThread = _readXML.GetVarInThreadp(attributeName, nameThread);          
                     break;
 
-                case "Ad":
+                case "S":
                     // This is public Function from class [ReadXML]
                     askThread = _readXML.GetVar_1LevelInThreadp(stepId, attributeName, nameThread);
                     break;
 
-                case "Al":
+                case "V":
                     // This is public Function from class [ReadXML]
-                    askThread = _readXML.GetVar_2LevelInThreadp(stepId, attributeName, nameThread);
+                    askThread = _readXML.GetVar_2LevelInThreadpSRM(stepId, attributeName, nameThread);
+                    break;
+
+                case "C":
+                    // This is public Function from class [ReadXML]
+                    askThread = _readXML.GetVar_2LevelInThreadpCRM(stepId, attributeName, nameThread);
                     break;
 
                 case "T":

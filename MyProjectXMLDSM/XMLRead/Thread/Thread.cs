@@ -40,7 +40,10 @@ namespace CSC
     public class XThread 
     {   
         #region Private and Public Variables
-
+        private int stepsCSC;
+        private int stepsCRC;
+        private int stepsTRC;
+       
         private string fileName;
         private string IpAddres;
         private int slot;
@@ -85,12 +88,44 @@ namespace CSC
         #region INSTANCE
         private ReadXML mReadXML;
         private S7con mS7con;
-        #endregion 
 
-        private int stepsCSC;
-        private int stepsCRC;
-        private int stepsTRC;
-       
+        #endregion 
+        #region CLASS_Data
+
+        // For raed all Variabels
+        internal class VariableData                     // I us it in function [VariableDesc_Read] to read a all data about one step
+        {
+            public List<string> VariableDesc { get; set; }
+            public List<string> SelectedValueType { get; set; }
+            public List<string> TRCDatablock { get; set; }
+            public List<string> TRCStartAddress { get; set; }
+            public List<string> TRCLength { get; set; }
+            public List<string>  MinDatablock {get; set; }
+            public List <string> MinStartAddress {get; set; }
+            public List<string> MaxDatablock {get; set;}
+            public List <string> MaxStartAddress {get; set; }
+        }
+        internal class VarSteps
+        {
+            public  List<VariableData> ListOfVariabelsAllSteps{ get; set; } = new List<VariableData>();
+        }
+
+        // For read all Componnents
+        internal class ComponentData
+        {
+            public List<string> ComponentDesc {get; set;}
+            public List<string> TRCDatablock {get; set;}
+            public List<string> TRCStartAddress {get; set;}
+            public List<string> TRCLenght {get; set;}
+        }
+
+        internal class ComSteps
+        {
+            public List<ComponentData> ListOfComponetsAllSteps {get; set; } = new List<ComponentData>();
+        }
+
+        #endregion
+        
         public XThread(string fileName, string IpAddres, int slot, int rack)
         {
             mReadXML = new ReadXML(fileName);
@@ -499,10 +534,12 @@ namespace CSC
 
             #region VARIABELS
             
-            string  dmc = string.Empty;         // DMC 
-            int model = 0;                      // No model
-            bool dmcAndModel_Check = true;      // DMC [correct status]
+            string  dmc = string.Empty;                         // DMC 
+            int model = 0;                                      // No model
+            bool dmcAndModel_Check = true;                      // DMC [correct status]
+            List<int> eSTRC_OP;                                 // ESTRC's 
             bool cycleStatus = false;
+
             #endregion
 
             bool REQ = REQ_Read("TRC");         // Read REQ
@@ -513,13 +550,13 @@ namespace CSC
 
             if (REQ != false)                   // Debug
             {
-                DateTime _in = InDateTime_Read();
-                DateTime _out = OutDateTime_Read();
-                string sDTLIn = _in.ToString();
-                string sDTLOut = _out.ToString();
+                // DateTime _in = InDateTime_Read();
+                // DateTime _out = OutDateTime_Read();
+                // string sDTLIn = _in.ToString();
+                // string sDTLOut = _out.ToString();
 
-                Console.WriteLine($"sDTLIn: {sDTLIn}");
-                Console.WriteLine($"sDTLOut: {sDTLOut}");
+                // Console.WriteLine($"sDTLIn: {sDTLIn}");
+                // Console.WriteLine($"sDTLOut: {sDTLOut}");
             }
 
             if(REQ && (stepsTRC == 0))          // Step [0] thread <-- We are waiting to REQ from PLC
@@ -527,16 +564,16 @@ namespace CSC
                 dmc = DMC_Read("TRC"); // Read DMC
                 model = MOD_Read_TRC();
                 
-                if(string.IsNullOrEmpty(dmc) || (model == 0 ))
+                if(string.IsNullOrEmpty(dmc) || (model == 0 ))  // In this place I implemented ease controls : [I only check if dms isn't null and model diffrent to 0]
                 {
-                    dmcAndModel_Check = false;
-                    //RES_Write(16, "TRC");
+                    dmcAndModel_Check = false;                 
+                    RES_Write(30, "TRC");                       // Invalid DMC or Model code, the passed code is null or empty
                     stepsTRC = 3;
                 }
 
                 if(dmcAndModel_Check)
                 {
-                    // code ... controls
+                    // code ... controls or direct next step
                     stepsTRC++; // 1
                 }
 
@@ -544,8 +581,47 @@ namespace CSC
 
             }
 
-            if(REQ && (stepsTRC == 1))          // Step [1] Stored a data into db.ESTRC_
+            if(REQ && (stepsTRC == 1))          // Step [1] Stored a data into db.ESTRC_ and db.Archive for specific OPxxx
             {
+                // --- Preparing a Data to write SQL DataBase ---
+
+                VarSteps sTepsDataVar = new VarSteps();                         // This type content of List<VariableData> return by function VariableSforStep_Read();
+                ComSteps sTepsDataComp = new ComSteps();                        // This type content of List<ComponentData> return by function ComponetSforStep_Read();
+                
+                var quantityOfSteps = mReadXML.StepNUMp("CSC");                 // <-- CSC !!! (it correct). [List<string>] Read a Quantity of Steps from XML files
+                int quantityOfStepsForSpecificOPxxx = quantityOfSteps.Count;    // <-- quqntity of Steps [int]
+
+                eSTRC_OP = ESTRC_Read(quantityOfSteps);                         // Read ESTRC from PLC
+                
+                // The function VariableSforStep_Read return instans for VariableData class which conntent all Variabels for specific Step
+                for(int i = 0; i < quantityOfSteps.Count; i++){
+                    sTepsDataVar.ListOfVariabelsAllSteps.Add(VariableSforStep_Read(quantityOfSteps[i]));
+                    sTepsDataComp.ListOfComponetsAllSteps.Add(ComponetSforStep_Read(quantityOfSteps[i]));
+                }
+
+                // Access to one of variabel regarding first step
+                // var x = sTepsData.ListOfVariabelsAllSteps[0].VariableDesc[0];
+                // Console.WriteLine(x.ToString());
+
+                
+                // DEBUG INFORMATIONS
+
+                foreach(var item in quantityOfSteps){
+                    Console.WriteLine($"Step: {item}");
+                }
+
+                foreach(var item in eSTRC_OP){
+                    Console.WriteLine($"ESTRC: {item.ToString()}");
+                }
+
+                Console.WriteLine("--------------- Var -------------------------");
+                DysplayAllVarForAllSteps(sTepsDataVar);
+
+                Console.WriteLine("--------------- Comp ------------------------");
+                DysplayAllCompForAllSteps(sTepsDataComp);
+
+                Console.ReadKey();
+
                 stepsTRC++; // 2
             }
 
@@ -568,7 +644,8 @@ namespace CSC
                 ACK_Write( false, "TRC");
                 stepsTRC = 0;
             }
-            Console.WriteLine($"STEPS :{stepsTRC}");
+
+            Console.WriteLine($"DEBUG: {stepsTRC} !");
 
             return cycleStatus;
         }
@@ -659,54 +736,54 @@ namespace CSC
             return returnDmc;
         }
         private int MOD_Read(string _thread)
+        {
+            int returnModel = 0;
+
+            var DB_model = mReadXML.GetVarInThreadp("ModelDatablock", _thread);
+            var Byte_model = mReadXML.GetVarInThreadp("ModelByte", _thread );
+
+            if((DB_model.Count > 0) && (Byte_model.Count > 0))
             {
-                int returnModel = 0;
+                int _modelDatablock = int.Parse(DB_model[0]);
+                int _modelByte = int.Parse(Byte_model[0]);
 
-                var DB_model = mReadXML.GetVarInThreadp("ModelDatablock", _thread);
-                var Byte_model = mReadXML.GetVarInThreadp("ModelByte", _thread );
-
-                if((DB_model.Count > 0) && (Byte_model.Count > 0))
+                if(mS7con.connectPLc())
                 {
-                    int _modelDatablock = int.Parse(DB_model[0]);
-                    int _modelByte = int.Parse(Byte_model[0]);
-
-                    if(mS7con.connectPLc())
-                    {
-                        int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
-                        returnModel = NModel;
-                    }
-                    else
-                    {
-                        throw new Exception("Not connect to PLC or something alse !");
-                    }
-                    return returnModel;
+                    int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
+                    returnModel = NModel;
+                }
+                else
+                {
+                    throw new Exception("Not connect to PLC or something alse !");
                 }
                 return returnModel;
+            }
+            return returnModel;
         }
         private int MOD_Read_TRC()
+        {
+            int returnModel = 0;
+
+            var DB_model = mReadXML.GetVarInThreadp("ModelCodeDatablock", "TRC");
+            var Byte_model = mReadXML.GetVarInThreadp("ModelCodeByte", "TRC" );
+
+            if((DB_model.Count > 0) && (Byte_model.Count > 0))
             {
-                int returnModel = 0;
+                int _modelDatablock = int.Parse(DB_model[0]);
+                int _modelByte = int.Parse(Byte_model[0]);
 
-                var DB_model = mReadXML.GetVarInThreadp("ModelCodeDatablock", "TRC");
-                var Byte_model = mReadXML.GetVarInThreadp("ModelCodeByte", "TRC" );
-
-                if((DB_model.Count > 0) && (Byte_model.Count > 0))
+                if(mS7con.connectPLc())
                 {
-                    int _modelDatablock = int.Parse(DB_model[0]);
-                    int _modelByte = int.Parse(Byte_model[0]);
-
-                    if(mS7con.connectPLc())
-                    {
-                        int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
-                        returnModel = NModel;
-                    }
-                    else
-                    {
-                        throw new Exception("Not connect to PLC or something alse !");
-                    }
-                    return returnModel;
+                    int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
+                    returnModel = NModel;
+                }
+                else
+                {
+                       throw new Exception("Not connect to PLC or something alse !");
                 }
                 return returnModel;
+            }
+            return returnModel;
         }
         private List<string> STEp_Read(string _thread)                  // This function return a quantity of steps
         {
@@ -766,7 +843,106 @@ namespace CSC
             }
             return dt;
         }
+        private List<int> ESTRC_Read(List<string> quantityOfSteps)      // Only for TRC Thread
+        {
+             #region VARIABELS
 
+            List<string> DB_ESTRC_tem = new List<string>();
+            List<string> Byte_ESTRC_tem = new List<string>();
+
+            List<int> DB_ESTRC_int = new List<int>();
+            List<int> Byte_ESTRC_int = new List<int>();
+
+            List<int> ESTRS_forSpecificOPxxx = new List<int>();
+            #endregion
+                
+            try // ESTRC for each specific steps
+            {
+                if(quantityOfSteps.Count > 0) // I read from XML data regarding a ESTRC DB & Bytes
+                {
+                    foreach(var item in quantityOfSteps){
+                        var temDBStep = mReadXML.GetVar_1LevelInThreadp(item, "ESTRCDatablock", "TRC");
+                        var temByteStep = mReadXML.GetVar_1LevelInThreadp(item, "ESTRCByte", "TRC");
+                        DB_ESTRC_tem.Add(temDBStep[0]);
+                        Byte_ESTRC_tem.Add(temByteStep[0]);    
+                   }
+                }
+
+                if((DB_ESTRC_tem.Count > 0) && (Byte_ESTRC_tem.Count > 0)) // I convert List<string> to List<int>. I use Linq
+                {
+                    DB_ESTRC_int = DB_ESTRC_tem.Select(int.Parse).ToList();
+                    Byte_ESTRC_int = Byte_ESTRC_tem.Select(int.Parse).ToList();
+
+                    if(mS7con.connectPLc())
+                    {
+                        if(DB_ESTRC_int.Count == Byte_ESTRC_int.Count){
+                            for(int i = 0; i < DB_ESTRC_int.Count; i++){
+                                ESTRS_forSpecificOPxxx.Add(mS7con.ReadByte(DB_ESTRC_int[i], Byte_ESTRC_int[i]));
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Error during: Tray to read ESTRC of each steps :{ex.Message}\n{ex.StackTrace}");
+            }
+            
+            return ESTRS_forSpecificOPxxx;
+        }
+        private VariableData VariableSforStep_Read(string NoStep)       // Only for TRC Thread
+        {
+            VariableData dataStepVar;
+    
+            if(!int.TryParse(NoStep, out int NoStepCheck) || NoStepCheck <= 0)
+            {
+                throw new ArgumentException("Invalid steo number");
+            }
+
+            // helper
+            List<string> GetXmlData_helperVar(string noStep, string tag)
+            {
+                return mReadXML.GetVar_2LevelInThreadpSRM(noStep, tag, "TRC");
+            }
+
+            dataStepVar = new VariableData{
+                VariableDesc = GetXmlData_helperVar(NoStep, "VariableDesc"),
+                SelectedValueType = GetXmlData_helperVar(NoStep, "SelectedValueType"),
+                TRCDatablock = GetXmlData_helperVar(NoStep, "TRCDatablock"),
+                TRCStartAddress = GetXmlData_helperVar(NoStep, "TRCStartAddress"),
+                TRCLength = GetXmlData_helperVar(NoStep, "TRCLenght"),
+                MinDatablock = GetXmlData_helperVar(NoStep, "MinDatablock"),
+                MinStartAddress = GetXmlData_helperVar(NoStep, "MinStartAddress"),
+                MaxDatablock = GetXmlData_helperVar(NoStep, "MaxDatablock"),
+                MaxStartAddress = GetXmlData_helperVar(NoStep, "MaxStartAddress")
+            };
+ 
+            return dataStepVar;
+        }
+        private ComponentData ComponetSforStep_Read(string NoStep)
+        {
+            ComponentData dataStepComp;
+
+            if(!int.TryParse(NoStep, out int NoStepCheck) || NoStepCheck <= 0)
+            {
+                throw new ArgumentException("Invalid step number");
+            }
+
+            // helper
+            List<string> GetXmlData_helperComp(string noStep, string tag)
+            {
+                return mReadXML.GetVar_2LevelInThreadpCRM(noStep, tag, "TRC");
+            }
+
+            dataStepComp = new ComponentData{
+                ComponentDesc = GetXmlData_helperComp(NoStep, "ComponentDesc"),
+                TRCDatablock = GetXmlData_helperComp(NoStep, "TRCDatablock"),
+                TRCStartAddress = GetXmlData_helperComp(NoStep, "TRCStartAddress"),
+                TRCLenght = GetXmlData_helperComp(NoStep, "TRCLenght")
+            };
+
+            return dataStepComp;
+        }
         #endregion
 
         #region WRITE
@@ -1054,7 +1230,58 @@ namespace CSC
                 Console.WriteLine($"index:{counter} --> [{x}]");
             }
         }
-        
+        private void DysplayAllVarForStep(VariableData dataAll)                 // This function dysplay data from model type of VariableData which I us to read a data for all steps
+        {
+            //VariableData variableData = dataAll;
+
+            Console.WriteLine("VariableDesc: " + string.Join(", ", dataAll.VariableDesc));
+            Console.WriteLine("SelectedValueType: " + string.Join(", ", dataAll.SelectedValueType));
+            Console.WriteLine("TRCDatablock: " + string.Join(", ", dataAll.TRCDatablock));
+            Console.WriteLine("TRCStartAddress: " + string.Join(", ", dataAll.TRCStartAddress));
+            Console.WriteLine("TRCLength: " + string.Join(", ", dataAll.TRCLength));
+            Console.WriteLine("MinDatablock: " + string.Join(", ", dataAll.MinDatablock));
+            Console.WriteLine("MinStartAddress: " + string.Join(", ", dataAll.MinStartAddress));
+            Console.WriteLine("MaxDatablock: " + string.Join(", ", dataAll.MaxDatablock));
+            Console.WriteLine("MaxStartAddress: " + string.Join(", ", dataAll.MaxStartAddress)); 
+          
+        }
+        private void DysplayAllVarForAllSteps(VarSteps dataAllSteps)            // ...
+        {
+            //VarSteps variablesData = dataAllSteps;
+
+            for (int i = 0; i < dataAllSteps.ListOfVariabelsAllSteps.Count; i++)
+            {
+                //Console.WriteLine($"Step {i + 1}:");
+                Console.WriteLine($"Step {i + 1} [VariableDesc]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].VariableDesc));
+                Console.WriteLine($"Step {i + 1} [TRCDatablock]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].TRCDatablock));
+                Console.WriteLine($"Step {i + 1} [TRCStartAddress]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].TRCStartAddress));
+                Console.WriteLine($"Step {i + 1} [TRCLength]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].TRCLength));
+                Console.WriteLine($"Step {i + 1} [MinDatablock]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].MinDatablock));
+                Console.WriteLine($"Step {i + 1} [MinStartAddress]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].MinStartAddress));
+                Console.WriteLine($"Step {i + 1} [MaxDatablock]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].MaxDatablock));
+                Console.WriteLine($"Step {i + 1} [MaxStartAddress]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].MaxStartAddress));
+            }
+        }
+        private void DysplayAllCompFromStep(ComponentData dataAll)              // I'll want to description
+        {
+            Console.WriteLine("ComponentDesc: " + string.Join(", ", dataAll.ComponentDesc));
+            Console.WriteLine("TRCDatablock: " + string.Join(", ", dataAll.TRCDatablock));
+            Console.WriteLine("RCStartAddress: " + string.Join(", ", dataAll.TRCStartAddress));
+            Console.WriteLine("TRCLenght: " + string.Join(", ", dataAll.TRCLenght));
+        }
+        private void DysplayAllCompForAllSteps(ComSteps dataAllSteps)           // I'll want to description
+        {
+            //ComSteps componentData = dataAllSteps;
+            
+            for(int i = 0; i < dataAllSteps.ListOfComponetsAllSteps.Count; i++)
+            {
+                Console.WriteLine($"{i +1} [ComponentDesc]: " + string.Join(", ", dataAllSteps.ListOfComponetsAllSteps[i].ComponentDesc));
+                Console.WriteLine($"{i +1} [TRCDatablock]: " + string.Join(", ", dataAllSteps.ListOfComponetsAllSteps[i].TRCDatablock));
+                Console.WriteLine($"{i +1} [TRCStartAddres]: " + string.Join(", ", dataAllSteps.ListOfComponetsAllSteps[i].TRCStartAddress));
+                Console.WriteLine($"{i +1} [TRCLenght]: " + string.Join(", ", dataAllSteps.ListOfComponetsAllSteps[i].TRCLenght));
+            }
+
+        }
         #endregion
     }
 }
