@@ -34,6 +34,7 @@ using System.Data;
 using SQLitePCL;
 using Microsoft.EntityFrameworkCore.Sqlite.Query.Internal;
 using System.Xml.Schema;
+using ZebraMatrix;
 
 namespace CSC 
 {
@@ -43,6 +44,7 @@ namespace CSC
         private int stepsCSC;
         private int stepsCRC;
         private int stepsTRC;
+        private int stepsPRT;
        
         private string fileName;
         private string IpAddres;
@@ -88,6 +90,7 @@ namespace CSC
         #region INSTANCE
         private ReadXML mReadXML;
         private S7con mS7con;
+        private MatrixP printerZT411;
 
         #endregion 
         #region CLASS_Data
@@ -132,8 +135,8 @@ namespace CSC
             mS7con = new S7con(IpAddres, slot, rack);
             stepsCSC = 0;
             stepsCSC = 0;
-            stepsTRC = 0; 
-
+            stepsTRC = 0;
+            stepsPRT = 0; 
         }        
 
         // THE THREADS: CSC|CRC|TRC - PRT|KA
@@ -168,11 +171,55 @@ namespace CSC
             }
             return KeepALive;
         }
-        public bool Print_DataMatric(string NoDmc)
+        public bool Print_DataMatric(List<int> REQPrint, List<int> MODPrint, List<int> ACKPrint)
         {
-            return true;
-        }
+            try
+            {
+                printerZT411 = new MatrixP("192.168.0.22", 6101); // I have to move it to constructor but not now !!! [_disposed]
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error during made a MatrixP's instance " + ex.Message);
+            }
 
+            if((REQPrint.Count > 0) && (MODPrint.Count > 0) && (ACKPrint.Count > 0)){
+
+                var REQ = REQprt_Read(REQPrint);
+                var mod = MODprt_Read(MODPrint);
+
+                if(REQ && (stepsPRT == 0))
+                {
+                    Console.WriteLine($"model:{mod} | check a model and get corect DMC code for it ...");
+                    var statusPrin = printerZT411.printDMCcodeforModel("#6988#", 1);
+                    if(statusPrin){
+                       Console.WriteLine("Printed OK"); 
+                    }else{
+                       Console.WriteLine("Printed NOK"); 
+                    }
+
+                    stepsPRT++;
+                    Console.ReadKey();
+                }
+
+                if(REQ && (stepsPRT == 1))
+                {
+                    Console.WriteLine($"PRINTING & set ACK");
+                    ACKprt_Write(true, ACKPrint);  
+                    stepsPRT++;
+                }
+
+                if(!REQ && (stepsPRT == 2))
+                {
+                    Console.WriteLine("finish");
+                    ACKprt_Write(false, ACKPrint);
+                    stepsPRT = 0;
+                }
+
+            }else{
+                Console.WriteLine($"Error into: [Try to Print DMC] isConnect: {isConnect}");
+            }
+            return true;
+    }
         public bool CSC_thread()
         {
             #region DESCRYYPTION
@@ -538,6 +585,7 @@ namespace CSC
             int model = 0;                                      // No model
             bool dmcAndModel_Check = true;                      // DMC [correct status]
             List<int> eSTRC_OP;                                 // ESTRC's 
+            List<string> NameOfSteps = new List<string>();      // Name of Steps
             bool cycleStatus = false;
 
             #endregion
@@ -588,8 +636,14 @@ namespace CSC
                 VarSteps sTepsDataVar = new VarSteps();                         // This type content of List<VariableData> return by function VariableSforStep_Read();
                 ComSteps sTepsDataComp = new ComSteps();                        // This type content of List<ComponentData> return by function ComponetSforStep_Read();
                 
-                var quantityOfSteps = mReadXML.StepNUMp("CSC");                 // <-- CSC !!! (it correct). [List<string>] Read a Quantity of Steps from XML files
-                int quantityOfStepsForSpecificOPxxx = quantityOfSteps.Count;    // <-- quqntity of Steps [int]
+                var quantityOfSteps = mReadXML.StepNUMp("CSC");                                                     // <-- CSC !!! (it correct). [List<string>] Read a Quantity of Steps from XML files
+                
+                for(int i = 0; i < quantityOfSteps.Count; i++){
+                    var NameSteps_tem = mReadXML.GetVar_1LevelInThreadp(quantityOfSteps[i], "Name", "TRC");        // <-- Name of Step [List<string>]
+                    NameOfSteps.Add(NameSteps_tem[0]);
+                }
+                
+                int quantityOfStepsForSpecificOPxxx = quantityOfSteps.Count;                                        // <-- quqntity of Steps [int]
 
                 eSTRC_OP = ESTRC_Read(quantityOfSteps);                         // Read ESTRC from PLC
                 
@@ -599,12 +653,23 @@ namespace CSC
                     sTepsDataComp.ListOfComponetsAllSteps.Add(ComponetSforStep_Read(quantityOfSteps[i]));
                 }
 
+                // ---
+
+
+
+
+
+                // ---
+
                 // Access to one of variabel regarding first step
                 // var x = sTepsData.ListOfVariabelsAllSteps[0].VariableDesc[0];
                 // Console.WriteLine(x.ToString());
 
                 
                 // DEBUG INFORMATIONS
+                foreach(var item in NameOfSteps){
+                    Console.WriteLine($"Neme: {item}");
+                }
 
                 foreach(var item in quantityOfSteps){
                     Console.WriteLine($"Step: {item}");
@@ -639,7 +704,7 @@ namespace CSC
                 stepsTRC = 4;
             }
 
-            if(REQ != true && (stepsTRC == 4))  // Steps Finish
+            if(!REQ && (stepsTRC == 4))  // Steps Finish
             {
                 ACK_Write( false, "TRC");
                 stepsTRC = 0;
@@ -652,6 +717,53 @@ namespace CSC
         
         // THE SIGNAL's :bits: ACK|REQ|WOK|WKO|RES and :byte: DMC|MOD
         #region READ
+        private bool REQprt_Read(List<int> REQPrint)        // PRT Manage
+        {
+             bool? RqeStatus = null;
+
+            if(REQPrint.Count > 0){
+
+             var _reqDatablock = REQPrint[0];
+             var _reqByte = REQPrint[1];
+             var _reqbite = REQPrint[2];
+
+                if(mS7con.connectPLc() && !isConnect){
+                    isConnect = true;
+
+                    bool REQ_print = mS7con.ReadBit(_reqDatablock, _reqByte, _reqbite);
+                    RqeStatus = REQ_print;
+
+                    isConnect = false;
+                    mS7con.disconnectPLc();
+                }else{
+                    Console.WriteLine($"Error into: [Try to Print DMC] isConnect: {isConnect}");
+                }
+            }
+             return RqeStatus ?? false;
+        }
+        private int MODprt_Read(List<int> MODPrint)         // PRT Manage
+        {
+            int returnModel = 0;
+
+            if(MODPrint.Count > 0){
+                var _modelDatablock = MODPrint[0];
+                var _modelByte = MODPrint[1];
+
+                if(mS7con.connectPLc() && !isConnect){
+                    isConnect = true;
+
+                    int NModel = mS7con.ReadByte(_modelDatablock, _modelByte);
+                    returnModel = NModel;
+
+                    isConnect = false;
+                    mS7con.disconnectPLc();
+                }else{
+                    Console.WriteLine($"Error into: [Try to Print DMC] isConnect: {isConnect}");
+                }
+                return returnModel;
+            }
+            return returnModel;
+        }
         private string OpName_Read()
         {
             var OpName = mReadXML.GetVarInThreadp("OpName", "OPE");
@@ -946,6 +1058,29 @@ namespace CSC
         #endregion
 
         #region WRITE
+        private bool ACKprt_Write(bool _val, List<int> ACKPrint)        // PRT Manage
+        {
+             bool? AckStatus = null;
+
+            if(ACKPrint.Count > 0){
+
+             var _ackDatablock = ACKPrint[0];
+             var _ackbyte = ACKPrint[1];
+             var _ackbite = ACKPrint[2];
+
+                if(mS7con.connectPLc() && !isConnect){
+                    isConnect = true;
+
+                    AckStatus = mS7con.WriteBit(_ackDatablock, _ackbyte, _ackbite, _val);
+
+                    isConnect = false;
+                    mS7con.disconnectPLc();
+                }else{
+                    Console.WriteLine($"Error into: [Try to Print DMC] isConnect: {isConnect}");
+                }
+            }
+             return AckStatus ?? false;
+        }
         private bool ACK_Write(bool _val, string _thread)
         {
             bool? AckStatus = null;

@@ -98,6 +98,8 @@
 <gitInformation>
 
    git rm -r --cached XMLRead/bin/
+
+
  </gitInformation>
 
 <ItemGroup>
@@ -240,6 +242,7 @@ foreach (var variable in data.VariableDesc)
 
 //------
 
+net8.0-windows10.0.19041
 
 
 

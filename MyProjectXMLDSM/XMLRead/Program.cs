@@ -138,15 +138,20 @@ namespace DSMTester
                     Console.WriteLine($"Stack trace: {ex.StackTrace}|{ex.Message}");
                 }
             }
+
+            // print label unfortunetly to us whit specific OP
+            var REQPrint = new List<int> { 1004, 0, 0 };
+            var MODPrint = new List<int>{ 1004, 1};
+            var ACKPrint = new List<int>{ 1004, 0, 1};
       
             while (true)
             {   
                 Console.WriteLine("Machines cycle is launch ...");
 
-                //var status_ak  =  myOpCycle.IsAlive("101", "0", "0");
+                var status_ak  =  myOpCycle.IsAlive("101", "0", "0");
                 //Console.WriteLine($"STATUS Keep Alive: {status_ak}");
 
-                //var status_csc =  myOpCycle.CSC_thread();
+                var status_csc =  myOpCycle.CSC_thread();
                 //Console.WriteLine($"STATUS_CSC:{status_csc}");
 
                 var status_trc = myOpCycle.TRC_thread();
@@ -154,6 +159,9 @@ namespace DSMTester
 
                 // reading test from sqldb
                 //controlsOp770.csCValidFromSQL();
+
+                // PRT
+                var status_prt = myOpCycle.Print_DataMatric(REQPrint, MODPrint, ACKPrint);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
