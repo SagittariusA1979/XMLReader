@@ -76,6 +76,8 @@
 
 <dotnetInformation>
 
+   dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.6
+
    dotnet add package System.Data.SqlClient
    
    dotnet add package Microsoft.EntityFrameworkCore.SqlServer
@@ -86,6 +88,7 @@
    dotnet add package ZintNet
    dotnet add package SixLabors.ImageSharp
    dotnet add package System.Drawing.Common
+   dotnet add package Zebra.Printer.SDK
 
    dotnet add package Snap7 /https://snap7.sourceforge.net//
    dotnet add package Sharp7

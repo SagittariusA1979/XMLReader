@@ -6,8 +6,7 @@ namespace sqleasy
 {
     class SqlDi
     {
-
-        
+      
         /// <summary>
         /// string connectionString = @"Server=DESKTOP-ANOGUR9\WINCCPLUSMIG2014;Database=dbExamples;Integrated Security=True;";
         /// </summary>
@@ -18,7 +17,6 @@ namespace sqleasy
         public string m_pass;
         #endregion
         
-
         public SqlDi(string conStr, string user, string pass)
         {
             this.m_conStr = conStr;

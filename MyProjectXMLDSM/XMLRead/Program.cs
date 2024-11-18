@@ -1,8 +1,10 @@
 ﻿//#define PLC
 //#define DB
 //#define SWITCH
+#define DYNAMIC_DB
 
 using System;
+using System.Text;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +23,8 @@ using sqleasy;
 using System.Data.Common;
 using support;
 using dmc;
+using Archive;
+using Zebra.Sdk.Comm;
 
 
 
@@ -61,9 +65,67 @@ namespace DSMTester
             #endregion
             
             #region INSTANCEs
-
+            // <--------
             //ExampledbData myDataInToDB = new ExampledbData();
             //myDataInToDB.makeTestData();
+
+            // Creating a DB Tables for a Archiving traceability data 
+            // [But you have to remember one thing this proces you can lauch only one time e.g. ferst run ]
+            // DESKTOP-R31U1RJ 192.168.0.5
+
+            #if DYNAMIC_DB
+            ArchiveDbContext archiveDbContext= new ArchiveDbContext("Server=DESKTOP-R31U1RJ\\SQLEXPRESS;Database=sqlDsmDb;User Id=sql;Password=sql;TrustServerCertificate=True");
+            var connDBTrc = archiveDbContext.CheckDatabaseConnection();
+
+            var (isConnected, errorMessage) = archiveDbContext.CheckDatabaseConnection_nextGen();
+
+            if (isConnected){
+                Console.WriteLine("Database connected successfully.");
+            }
+            else{
+                Console.WriteLine($"Failed to connect to the database. Error: {errorMessage}");
+            }
+
+            // Try to make a dynamic tablet for a traceability's data
+
+            var tableName = "MyDynamicTable";
+            var nameOP = "OperationName";
+            var nameSteps = new List<string> { "Step1", "Step2" };
+            var statusSteps = new List<string> { "Status1", "Status2" };
+            var nameVariables = new List<string> { "Var1", "Var2" };
+            var variables = new List<string> { "Val1", "Val2" };
+            var varMin = new List<string> { "Min1", "Min2" };
+            var varMax = new List<string> { "Max1", "Max2" };
+            var nameComponent = new List<string> { "Component1", "Component2" };
+            var components = new List<string> { "CompVal1", "CompVal2" };
+
+            archiveDbContext.MakeTable(tableName, nameOP, nameSteps, statusSteps, nameVariables, variables, varMin, varMax, nameComponent, components);
+            #endif
+
+
+
+            // using (var context = new ArchiveDbContext("Server=DESKTOP-R31U1RJ\\SQLEXPRESS;Database=sqlDsmDb;User Id=sql;Password=sql;TrustServerCertificate=True"))
+            // {
+            //     // Ensure the database is created
+            //     context.Database.EnsureCreated();
+                
+
+            //     // Create a new dbModel instance
+            //     var user = new dbUser
+            //     {
+            //         Ver = "John Doe",
+            //         signatur = "DateTime.Now.ToString()"
+            //     };
+
+            //     // Add the user to the DbSet
+            //     context.dbUser.Add(user);
+                
+            //     // Save changes to the database
+            //     context.SaveChanges();
+            // }
+    
+
+            // <---------------
 
             #if DB
             // https://learn.microsoft.com/pl-pl/dotnet/csharp/linq/get-started/walkthrough-writing-queries-linq
@@ -117,6 +179,7 @@ namespace DSMTester
             SqlDi controlsOp770 = new SqlDi("#","#","#");
             XThread myOpCycle = new XThread("myX.xml", "192.168.1.5", 0, 1);
 
+            
             // We check how many memory are located whit prpgrams
             int[] largeArray = new int[1000000];
 

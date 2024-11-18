@@ -636,7 +636,7 @@ namespace CSC
                 VarSteps sTepsDataVar = new VarSteps();                         // This type content of List<VariableData> return by function VariableSforStep_Read();
                 ComSteps sTepsDataComp = new ComSteps();                        // This type content of List<ComponentData> return by function ComponetSforStep_Read();
                 
-                var quantityOfSteps = mReadXML.StepNUMp("CSC");                                                     // <-- CSC !!! (it correct). [List<string>] Read a Quantity of Steps from XML files
+                var quantityOfSteps = mReadXML.StepNUMp("CSC");                                                    // <-- CSC !!! (it correct). [List<string>] Read a Quantity of Steps from XML files
                 
                 for(int i = 0; i < quantityOfSteps.Count; i++){
                     var NameSteps_tem = mReadXML.GetVar_1LevelInThreadp(quantityOfSteps[i], "Name", "TRC");        // <-- Name of Step [List<string>]
@@ -655,6 +655,8 @@ namespace CSC
 
                 // ---
 
+                
+
 
 
 
@@ -668,15 +670,15 @@ namespace CSC
                 
                 // DEBUG INFORMATIONS
                 foreach(var item in NameOfSteps){
-                    Console.WriteLine($"Neme: {item}");
+                    Console.WriteLine($"Neme: {item}");                 // all step's name [Neme: Step03]
                 }
 
-                foreach(var item in quantityOfSteps){
+                foreach(var item in quantityOfSteps){                   // all No. of steps [Step: 12]
                     Console.WriteLine($"Step: {item}");
                 }
 
                 foreach(var item in eSTRC_OP){
-                    Console.WriteLine($"ESTRC: {item.ToString()}");
+                    Console.WriteLine($"ESTRC: {item.ToString()}");     // all data's ESTRC for each step in specificity Machines [ESTRC: 3]
                 }
 
                 Console.WriteLine("--------------- Var -------------------------");
