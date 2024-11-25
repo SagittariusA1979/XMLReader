@@ -1,7 +1,7 @@
 ﻿//#define PLC
 //#define DB
 //#define SWITCH
-#define DYNAMIC_DB
+//#define DYNAMIC_DB
 
 using System;
 using System.Text;
@@ -74,32 +74,35 @@ namespace DSMTester
             // DESKTOP-R31U1RJ 192.168.0.5
 
             #if DYNAMIC_DB
-            ArchiveDbContext archiveDbContext= new ArchiveDbContext("Server=DESKTOP-R31U1RJ\\SQLEXPRESS;Database=sqlDsmDb;User Id=sql;Password=sql;TrustServerCertificate=True");
-            var connDBTrc = archiveDbContext.CheckDatabaseConnection();
+            // ArchiveDbContext archiveDbContext= new ArchiveDbContext("Server=DESKTOP-R31U1RJ\\SQLEXPRESS;Database=sqlDsmDb;User Id=sql;Password=sql;TrustServerCertificate=True");
+            // var connDBTrc = archiveDbContext.CheckDatabaseConnection();
 
-            var (isConnected, errorMessage) = archiveDbContext.CheckDatabaseConnection_nextGen();
+            // var (isConnected, errorMessage) = archiveDbContext.CheckDatabaseConnection_nextGen();
 
-            if (isConnected){
-                Console.WriteLine("Database connected successfully.");
-            }
-            else{
-                Console.WriteLine($"Failed to connect to the database. Error: {errorMessage}");
-            }
+            // if (isConnected){
+            //     Console.WriteLine("Database connected successfully.");
+            // }
+            // else{
+            //     Console.WriteLine($"Failed to connect to the database. Error: {errorMessage}");
+            // }
 
-            // Try to make a dynamic tablet for a traceability's data
+            // // Try to make a dynamic tablet for a traceability's data
+            // // "this code I have to move to class [Thread]"   
 
-            var tableName = "MyDynamicTable";
-            var nameOP = "OperationName";
-            var nameSteps = new List<string> { "Step1", "Step2" };
-            var statusSteps = new List<string> { "Status1", "Status2" };
-            var nameVariables = new List<string> { "Var1", "Var2" };
-            var variables = new List<string> { "Val1", "Val2" };
-            var varMin = new List<string> { "Min1", "Min2" };
-            var varMax = new List<string> { "Max1", "Max2" };
-            var nameComponent = new List<string> { "Component1", "Component2" };
-            var components = new List<string> { "CompVal1", "CompVal2" };
+            // var tableName = "MyDynamicTable";
+            // var nameOP = "OperationName";
+            // var nameSteps = new List<string> { "Step1", "Step2" };
+            // var statusSteps = new List<string> { "Status1", "Status2" };
+            // var nameVariables = new List<string> { "Var1", "Var2" };
+            // var variables = new List<string> { "Val1", "Val2" };
+            // var varMin = new List<string> { "Min1", "Min2" };
+            // var varMax = new List<string> { "Max1", "Max2" };
+            // var nameComponent = new List<string> { "Component1", "Component2" };
+            // var components = new List<string> { "CompVal1", "CompVal2" };
 
-            archiveDbContext.MakeTable(tableName, nameOP, nameSteps, statusSteps, nameVariables, variables, varMin, varMax, nameComponent, components);
+            // archiveDbContext.MakeTable(tableName, nameOP, nameSteps, statusSteps, nameVariables, variables, varMin, varMax, nameComponent, components);
+            
+            
             #endif
 
 
@@ -177,7 +180,7 @@ namespace DSMTester
             Console.WriteLine(var_);
 
             SqlDi controlsOp770 = new SqlDi("#","#","#");
-            XThread myOpCycle = new XThread("myX.xml", "192.168.1.5", 0, 1);
+            XThread myOpCycle = new XThread("myX.xml", "192.168.1.5", 0, 1, "Server=DESKTOP-R31U1RJ\\SQLEXPRESS;Database=sqlDsmDb;User Id=sql;Password=sql;TrustServerCertificate=True");
 
             
             // We check how many memory are located whit prpgrams
@@ -219,6 +222,9 @@ namespace DSMTester
 
                 var status_trc = myOpCycle.TRC_thread();
                 //Console.WriteLine($"STATUS_TRC :{status_trc}");
+
+                // Make a tables for TRC
+                //myOpCycle.MakeHeaderArchive_p();  --- > TO BE REMOVED !!!
 
                 // reading test from sqldb
                 //controlsOp770.csCValidFromSQL();
