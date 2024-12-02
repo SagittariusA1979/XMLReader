@@ -173,6 +173,52 @@ namespace s7
                 throw new Exception($"Error reading from the PLC: {_client.ErrorText(result)}");
             }
         }
+        public int ReadIntegerData(int dbNumber, int start, int length)
+        {
+            int afterConvert = 0;
+            try
+            {
+                byte[] buffer = new byte[length];
+
+                int result = _client.DBRead(dbNumber, start, length, buffer);
+     
+                if (result == 0)  // 0 means OK
+                {
+                    switch (length)
+                    {
+                        case 4:
+                            // Convert the 4 bytes to an Int32
+                            afterConvert = BitConverter.ToInt32(buffer, 0);
+                            break;
+
+                        case 2:
+                            // Convert the 2 bytes to an Int16, and cast it to an Int32 for return
+                            afterConvert = BitConverter.ToInt16(buffer, 0);
+                            break;
+
+                        case 1:
+                            // Convert the single byte directly to an integer
+                            afterConvert = buffer[0];
+                            break;
+
+                        default:
+                            Console.WriteLine("Unsupported length for conversion. Must be 1, 2, or 4 bytes.");
+                            break;
+                    }
+
+                }
+                else
+                {
+                    Console.WriteLine($"Error reading data from PLC: {_client.ErrorText(result)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ReadIntegerData] Exception: {ex.Message}");
+            }
+            return afterConvert;
+        }
+        
         #endregion
 
         #region Write_value _to _PLC 

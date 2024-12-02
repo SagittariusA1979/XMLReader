@@ -10,6 +10,7 @@
 
 #define SHOWCSC
 #define EFAS_WRITE
+#define DBUG_INFO
 
 using System;
 using System.Collections;
@@ -36,6 +37,7 @@ using SQLitePCL;
 using Microsoft.EntityFrameworkCore.Sqlite.Query.Internal;
 using System.Xml.Schema;
 using ZebraMatrix;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CSC 
 {
@@ -109,10 +111,34 @@ namespace CSC
             public List <string> MinStartAddress {get; set; }
             public List<string> MaxDatablock {get; set;}
             public List <string> MaxStartAddress {get; set; }
+
+            public bool IsEmptyAll()
+            {
+                return (VariableDesc == null || VariableDesc.Count == 0) &&
+                    (SelectedValueType == null || SelectedValueType.Count == 0) &&
+                    (TRCDatablock == null || TRCDatablock.Count == 0) &&
+                    (TRCStartAddress == null || TRCStartAddress.Count == 0) &&
+                    (TRCLength == null || TRCLength.Count == 0) &&
+                    (MinDatablock == null || MinDatablock.Count == 0) &&
+                    (MinStartAddress == null || MinStartAddress.Count == 0) &&
+                    (MaxDatablock == null || MaxDatablock.Count == 0) &&
+                    (MaxStartAddress == null || MaxStartAddress.Count == 0);
+            }
+
+            public bool IsEmptyOnlyVariableDesc()
+            {
+                return VariableDesc == null || VariableDesc.Count == 0;
+            }
         }
         internal class VarSteps
         {
             public  List<VariableData> ListOfVariabelsAllSteps{ get; set; } = new List<VariableData>();
+
+            public bool IsEmptyCheck()
+            {
+                //return ListOfVariabelsAllSteps == null || ListOfVariabelsAllSteps.Count == 0;
+                return ListOfVariabelsAllSteps.All(v => v.IsEmptyOnlyVariableDesc());
+            }
         }
 
         // For read all Componnents
@@ -129,7 +155,7 @@ namespace CSC
         }
         
         // For TRC_archiv dynamic table. "but you must remember, this date are intendet only the one machine !"
-        internal class HeaderTable
+        internal class HeaderTable                      // I use this model of data in two cases, for creating headers and creating data that refer to headers
         {
             public List<string> List_nameSteps {get; set;} = new List<string>();
             public List<string> List_statusSteps {get; set;} = new List<string>();
@@ -140,12 +166,6 @@ namespace CSC
             public List<string> List_nameComponent {get; set;} = new List<string>();
             public List<string> List_components {get; set;} = new List<string>();
         } 
-        internal class HeaderTableTRC
-        {
-            public List<HeaderTable> listToMakeheader {get; set;} = new List<HeaderTable>();
-
-        }
-
 
         #endregion
         
@@ -601,7 +621,6 @@ namespace CSC
             // ...
             #endregion
 
-
             #region VARIABELS
             string nameOp = string.Empty;                            // Name OP
             string  dmc = string.Empty;                              // DMC 
@@ -609,7 +628,7 @@ namespace CSC
             bool dmcAndModel_Check = true;                           // DMC [correct status]
             List<int> eSTRC_OP;                                      // ESTRC's 
             List<string> NameOfSteps = new List<string>();           // Name of Steps
-            //HeaderTable headerTable;                             //...
+            //HeaderTable resultHeaderForArchivtable = new HeaderTable();
             bool cycleStatus = false;
 
             #endregion
@@ -657,8 +676,10 @@ namespace CSC
             {
                 // --- Preparing a Data to write SQL DataBase ---
 
-                nameOp = OpName_Read();
+                nameOp = OpName_Read();                                                                                             // Name of curent machines
                 var quantityOfSteps = mReadXML.StepNUMp("CSC");                                                                     // <-- CSC !!! (it correct). [List<string>] Read a Quantity of Steps from XML files
+                                                                                                                                    // the [StepNUMp()] rteturn a styep's number form XML becouse are specific, 
+                                                                                                                                    // They are not in order in the queue !!! e.g steps 1 would be a number 7
                 
                 for(int i = 0; i < quantityOfSteps.Count; i++){
                     var NameSteps_tem = mReadXML.GetVar_1LevelInThreadp(quantityOfSteps[i], "Name", "TRC");                         // <-- Name of Step [List<string>]
@@ -668,8 +689,9 @@ namespace CSC
                 int quantityOfStepsForSpecificOPxxx = quantityOfSteps.Count;                                                        // <-- quqntity of Steps [int]
                 eSTRC_OP = ESTRC_Read(quantityOfSteps);                                                                             // Read directly value ESTRC from PLC
                 
-                var resultVarSANDComS = CompSANDVarSforStep_Read();                                                                 // Read diectly value of Variabels and Components for specific step 
-                var resultHeaderForArchivtable = CreatingHeader(NameOfSteps, resultVarSANDComS.Item1, resultVarSANDComS.Item2);     // It return a headers for a archive table
+                var resultVarSANDComS = CompSANDVarSforStep_Read();                                                                         // Read diectly value of Variabels and Components for specific step 
+                var resultHeaderForArchivtable = CreatingHeader(NameOfSteps, resultVarSANDComS.Item1, resultVarSANDComS.Item2);             // It return a headers for a archive table
+                var resultVarandCommForArchivetable = CreatingVarAndComm(NameOfSteps, eSTRC_OP, resultVarSANDComS.Item1, resultVarSANDComS.Item2);    // ....
 
                 // In this feild I have a all data regarding PLC's DB and next step I have to use this data and read directly data from PLC 
                 // and writ are to sqlDb, [ but after write, I have to check if tables which I want to write exist or not !!! ]
@@ -678,22 +700,16 @@ namespace CSC
                  // string NmaeOP               - string [nameOP]
                  // list <string> NameOfSteps   - list [step's name]
                  // list <string> eSTRC_OP      - list [ESTRC's No for each Steps] // eSTRC_OP.Select(x => x.ToString()).ToList(),
-
-
-                 HeaderTableTRC headerTableTRC= new HeaderTableTRC();                                                                   // I haven't used [HeaderTableTRC] because I have only one List<headerTable> but ...
-                 headerTableTRC.listToMakeheader.Add(resultHeaderForArchivtable);
                  
-                 MakeTableAndHeaderArchiveTable(nameOp, "OP", headerTableTRC);                                                          // This place i check (if exist or not, table in SQL database) and creating it if not exist
-
+                
+                
+                MakeTableAndHeaderArchiveTable(nameOp, "OP", resultHeaderForArchivtable);                     // This place i check (if exist or not, table in SQL database) and creating it if not exist
+                //StoredDataInToSqlTable(resultVarandCommForArchivetable);
 
                 // ---
 
-                // Access to one of variabel regarding first step
-                // var x = sTepsData.ListOfVariabelsAllSteps[0].VariableDesc[0];
-                // Console.WriteLine(x.ToString());
-
+                #if DBUG_INFO // DEBUG INFORMATIONS
                 
-                // DEBUG INFORMATIONS
                 Console.WriteLine($"{nameOp}");                         // Name intendent to specific OP
 
                 foreach(var item in NameOfSteps){
@@ -708,25 +724,42 @@ namespace CSC
                     Console.WriteLine($"ESTRC: {item.ToString()}");     // all data's ESTRC for each step in specificity Machines [ESTRC: 3]
                 }
 
-                Console.WriteLine("--------------- Headers -------------------------");
-                foreach (var header in headerTableTRC.listToMakeheader)
-                {
-                    Console.WriteLine("Steps: " + string.Join(", ", header.List_nameSteps));
-                    Console.WriteLine("Status: " + string.Join(", ", header.List_statusSteps));
-                    Console.WriteLine("NameVariables: " + string.Join(", ", header.List_nameVariables));
-                    Console.WriteLine("Variables: " + string.Join(", ", header.List_variables));
-                    Console.WriteLine("varMin: " + string.Join(", ", header.List_varMin));
-                    Console.WriteLine("VarMax: " + string.Join(", ", header.List_varMax));
-                    Console.WriteLine("NameComponents: " + string.Join(", ", header.List_nameComponent));
-                    Console.WriteLine("CodeComponents: " + string.Join(", ", header.List_components));
-                    Console.WriteLine();
-                }
+                
+                Console.WriteLine("--------------- Headers  -------------------------");
+                Console.WriteLine();
+                Console.WriteLine("Steps: " + string.Join(", ", resultHeaderForArchivtable.List_nameSteps));
+                Console.WriteLine("Status: " + string.Join(", ", resultHeaderForArchivtable.List_statusSteps));
+                Console.WriteLine("NameVariables: " + string.Join(", ", resultHeaderForArchivtable.List_nameVariables));
+                Console.WriteLine("Variables: " + string.Join(", ", resultHeaderForArchivtable.List_variables));
+                Console.WriteLine("varMin: " + string.Join(", ", resultHeaderForArchivtable.List_varMin));
+                Console.WriteLine("VarMax: " + string.Join(", ", resultHeaderForArchivtable.List_varMax));
+                Console.WriteLine("NameComponents: " + string.Join(", ", resultHeaderForArchivtable.List_nameComponent));
+                Console.WriteLine("CodeComponents: " + string.Join(", ", resultHeaderForArchivtable.List_components));
+                Console.WriteLine();
 
+                Console.WriteLine("--------------- Archve Date -------------------------");
+                 int mark = 1;
+                foreach(var item in resultVarandCommForArchivetable)
+                {
+                    Console.WriteLine("NameSteps_" + mark + " : " + string.Join("  ", item.List_nameSteps));
+                    Console.WriteLine("StatusSteps_" + mark + " : " + string.Join("  ", item.List_statusSteps));
+                    Console.WriteLine("NameVariabel_" + mark + " : " + string.Join("  ", item.List_nameVariables));
+                    Console.WriteLine("Variabel_" + mark + " : " + string.Join("  ", item.List_variables));
+                    Console.WriteLine("VarMin_" + mark + " : " + string.Join("  ", item.List_varMin));
+                    Console.WriteLine("VarMax_" + mark + " : " + string.Join("  ", item.List_varMax));
+                    Console.WriteLine("NameComponent_" + mark + " : " + string.Join("  ", item.List_nameComponent));
+                    Console.WriteLine("Serial_" + mark + " : " + string.Join("  ",  item.List_components));
+                    Console.WriteLine();
+                    mark++;
+                }
+            
                 Console.WriteLine("--------------- Var -------------------------");
                 DysplayAllVarForAllSteps(resultVarSANDComS.Item1);
 
                 Console.WriteLine("--------------- Comp ------------------------");
                 DysplayAllCompForAllSteps(resultVarSANDComS.Item2);
+                
+                #endif
 
                 Console.ReadKey();
 
@@ -1466,13 +1499,6 @@ namespace CSC
                 Console.WriteLine($"Step {i + 1} [MaxStartAddress]: " + string.Join(", ", dataAllSteps.ListOfVariabelsAllSteps[i].MaxStartAddress));
             }
         }
-        private void DysplayAllCompFromStep(ComponentData dataAll)              // I'll want to description
-        {
-            Console.WriteLine("ComponentDesc: " + string.Join(", ", dataAll.ComponentDesc));
-            Console.WriteLine("TRCDatablock: " + string.Join(", ", dataAll.TRCDatablock));
-            Console.WriteLine("RCStartAddress: " + string.Join(", ", dataAll.TRCStartAddress));
-            Console.WriteLine("TRCLenght: " + string.Join(", ", dataAll.TRCLenght));
-        }
         private void DysplayAllCompForAllSteps(ComSteps dataAllSteps)           // I'll want to description
         {
             //ComSteps componentData = dataAllSteps;
@@ -1484,9 +1510,8 @@ namespace CSC
                 Console.WriteLine($"{i +1} [TRCStartAddres]: " + string.Join(", ", dataAllSteps.ListOfComponetsAllSteps[i].TRCStartAddress));
                 Console.WriteLine($"{i +1} [TRCLenght]: " + string.Join(", ", dataAllSteps.ListOfComponetsAllSteps[i].TRCLenght));
             }
-
         }
-        private void MakeTableAndHeaderArchiveTable(string tableName, string nameOP, HeaderTableTRC newArchiveTable_trc)                                        // To male a Heders of dynamich archve tables --> External class [ ArchiveDbContext]
+        private void MakeTableAndHeaderArchiveTable(string tableName, string nameOP, HeaderTable newArchiveTable_trc)                                        // To male a Heders of dynamich archve tables --> External class [ ArchiveDbContext]
         {
             // This function is really important. She will make an Archive table in the SQL database 
             // for a data archive which will be processed during the TRC thread.
@@ -1496,16 +1521,16 @@ namespace CSC
             try
             {
                  if(newArchiveTable_trc != null){   
-                    var nameSteps = newArchiveTable_trc.listToMakeheader[0].List_nameSteps;
-                    var statusSteps = newArchiveTable_trc.listToMakeheader[0].List_statusSteps;
+                    var nameSteps = newArchiveTable_trc.List_nameSteps;
+                    var statusSteps = newArchiveTable_trc.List_statusSteps;
 
-                    var nameVariables = newArchiveTable_trc.listToMakeheader[0].List_nameVariables;
-                    var variables = newArchiveTable_trc.listToMakeheader[0].List_variables;
-                    var varMin = newArchiveTable_trc.listToMakeheader[0].List_varMin;
-                    var varMax = newArchiveTable_trc.listToMakeheader[0].List_varMax;
+                    var nameVariables = newArchiveTable_trc.List_nameVariables;
+                    var variables = newArchiveTable_trc.List_variables;
+                    var varMin = newArchiveTable_trc.List_varMin;
+                    var varMax = newArchiveTable_trc.List_varMax;
 
-                    var nameComponent = newArchiveTable_trc.listToMakeheader[0].List_nameComponent;
-                    var components = newArchiveTable_trc.listToMakeheader[0].List_components;
+                    var nameComponent = newArchiveTable_trc.List_nameComponent;
+                    var components = newArchiveTable_trc.List_components;
 
                     var (isConnected, errorMessage) = mArchiveDB.CheckDatabaseConnection_nextGen();
 
@@ -1529,39 +1554,188 @@ namespace CSC
                 Console.WriteLine("Error during make a archive tavle for TRC thread" + ex.Message.Select(x => x.ToString()));
             }
         }
-        private HeaderTable CreatingHeader(List<string> NameOfSteps, VarSteps item1, ComSteps item2)
+        private HeaderTable CreatingHeader(List<string> NameOfSteps, VarSteps item1, ComSteps item2) // I have to add a controls of flowe TRY/CATCH
         {
             HeaderTable headerTable = new HeaderTable();
             
             // Creating list for Name and Status. The loop run exacli so many time as we have a Steps
             for(int i = 0; i < NameOfSteps.Count; i++)
-                 {
-                    headerTable.List_nameSteps.Add($"Step{i + 1}");
-                    headerTable.List_statusSteps.Add($"Status{i + 1}");
-                 }
-                 // Creating list for Name/Var/Min/Max Variabels    
-                 for (int i = 0; i < item1.ListOfVariabelsAllSteps.Count; i++)
-                 {
-                    for(int vd = 0; vd < item1.ListOfVariabelsAllSteps[i].VariableDesc.Count; vd++)
-                    {
-                        headerTable.List_nameVariables.Add($"S{1 + i}_VariablesName{1 + vd}");
-                        headerTable.List_variables.Add($"S{1 + i}_Value{1 + vd}");
-                        headerTable.List_varMax.Add($"S{1 + i}_ValMax_{1 + vd}");
-                        headerTable.List_varMin.Add($"S{1 + i}_ValMin{1 + vd}");
-                    }
-                 }
-                 // Creating list for Name/NoSerial Commponent
-                 for(int i = 0; i < item2.ListOfComponetsAllSteps.Count; i++)
-                 {
-                    for(int cd = 0; cd < item2.ListOfComponetsAllSteps[i].ComponentDesc.Count; cd++)
-                    {
-                        headerTable.List_nameComponent.Add($"S{1 + i}_ComponentsName{1 + cd}");
-                        headerTable.List_components.Add($"S{1 + i}_ComponentsCode{1 + cd}");
-                    }
-                 }
+            {
+                headerTable.List_nameSteps.Add($"Step{i + 1}");
+                headerTable.List_statusSteps.Add($"Status{i + 1}");
+            }
+            // Creating list for Name/Var/Min/Max Variabels    
+            for (int i = 0; i < item1.ListOfVariabelsAllSteps.Count; i++)
+            {
+                for(int vd = 0; vd < item1.ListOfVariabelsAllSteps[i].VariableDesc.Count; vd++)
+                {
+                    headerTable.List_nameVariables.Add($"S{1 + i}_VariablesName{1 + vd}");
+                    headerTable.List_variables.Add($"S{1 + i}_Value{1 + vd}");
+                    headerTable.List_varMax.Add($"S{1 + i}_ValMax_{1 + vd}");
+                    headerTable.List_varMin.Add($"S{1 + i}_ValMin{1 + vd}");
+                }
+            }
+            // Creating list for Name/NoSerial Commponent
+            for(int i = 0; i < item2.ListOfComponetsAllSteps.Count; i++)
+            {
+                for(int cd = 0; cd < item2.ListOfComponetsAllSteps[i].ComponentDesc.Count; cd++)
+                {
+                    headerTable.List_nameComponent.Add($"S{1 + i}_ComponentsName{1 + cd}");
+                    headerTable.List_components.Add($"S{1 + i}_ComponentsCode{1 + cd}");
+                }
+            }
 
             return headerTable;
         }
+        private List<HeaderTable> CreatingVarAndComm(List<string> NameOfSteps, List<int> eSTRC_OP, VarSteps itemVar, ComSteps itemStep) // This function reads directly  the data from PLC 
+        {
+            List<HeaderTable> dataToHedesrForSpecificStepAll = new List<HeaderTable>();
+           // HeaderTable dataToHedesrForSpecificStep = new HeaderTable();
+
+            try
+            {
+                // Variables for Steps (#)
+                if(itemVar.ListOfVariabelsAllSteps.Count != 0){
+                    
+                        
+                    for (int i = 0; i < itemVar.ListOfVariabelsAllSteps.Count; i++) // This loop reads a directly data from PLC and writes source data to the SQL database
+                    {
+                        HeaderTable dataToHedesrForSpecificStep = new HeaderTable();
+
+                        dataToHedesrForSpecificStep.List_nameSteps.Add($"{NameOfSteps[i]}"); 
+                        dataToHedesrForSpecificStep.List_statusSteps.Add($"{eSTRC_OP[i]}");
+
+                        dataToHedesrForSpecificStep.List_nameVariables.AddRange(itemVar.ListOfVariabelsAllSteps[i].VariableDesc);             // name of variabels 
+                        
+                        var DB_TRCDatablock = itemVar.ListOfVariabelsAllSteps[i].TRCDatablock;              // DB for value refer variabel
+                        var Byte_TRCStartAddress = itemVar.ListOfVariabelsAllSteps[i].TRCStartAddress;      // Byte for value refer variable 
+                        var amount_TRCLength = itemVar.ListOfVariabelsAllSteps[i].TRCLength;                // Amount for value refer variable
+
+                        var DB_MinDatablock = itemVar.ListOfVariabelsAllSteps[i].MinDatablock;
+                        var Byte_MinStartAddress = itemVar.ListOfVariabelsAllSteps[i].MinStartAddress;
+                        
+                        var BD_MaxDatablock = itemVar.ListOfVariabelsAllSteps[i].MaxDatablock;
+                        var Byte_MaxStartAddress = itemVar.ListOfVariabelsAllSteps[i].MaxStartAddress;
+
+
+
+                        Console.WriteLine($"Debug information {i + 1} <<<<<<<< VARIABEL >>>>>>>");
+                        Console.WriteLine($"DB_TRCDatablock: " + string.Join("| ", DB_TRCDatablock));
+                        Console.WriteLine("Byte_TRCStartAddress: " + string.Join("| ", Byte_TRCStartAddress));
+                        Console.WriteLine("amount_TRCLength: " + string.Join("| ", amount_TRCLength));
+
+                        if((DB_TRCDatablock.Count > 0) && (Byte_TRCStartAddress.Count > 0) && (amount_TRCLength.Count > 0))
+                        {
+                            for(int x = 0;  x < DB_TRCDatablock.Count; x++)
+                            {
+                                int DB_TRC = int.Parse(DB_TRCDatablock[x]);
+                                int Byte_TRC = int.Parse(Byte_TRCStartAddress[x]);
+                                int len_TRC = int.Parse(amount_TRCLength[x]);
+
+                                int DB_MAX = int.Parse(BD_MaxDatablock[x]);
+                                int Byte_MAX = int.Parse(Byte_MaxStartAddress[x]);
+
+                                int DB_MIN = int.Parse(DB_MinDatablock[x]);
+                                int Byte_MIN = int.Parse(Byte_MinStartAddress[x]);
+
+                                if(mS7con.connectPLc())
+                                {
+
+                                    int val = mS7con.ReadIntegerData(DB_TRC, Byte_TRC, len_TRC);   // Real or Integer !!! TO CHECK
+                                    int max = mS7con.ReadIntegerData(DB_MAX, Byte_MAX, 1);
+                                    int min = mS7con.ReadIntegerData(DB_MIN, Byte_MIN, 1);
+                                    
+                                    Console.WriteLine($"DB:{DB_TRC} Byte: {Byte_TRC} Len: {len_TRC}");
+                                    Console.WriteLine($"value: {val}");
+                                    
+                                    Console.WriteLine($"DBmax:{DB_MAX} Bytemax: {Byte_MAX} Lenmax: {1}");
+                                    Console.WriteLine($"value: {max}");
+
+                                    Console.WriteLine($"DB:{DB_MIN} Byte: {Byte_MIN} Len: {1}");
+                                    Console.WriteLine($"value: {min}");
+
+
+                                    dataToHedesrForSpecificStep.List_variables.Add(Convert.ToString(val));
+                                    dataToHedesrForSpecificStep.List_varMax.Add(Convert.ToString(max));
+                                    dataToHedesrForSpecificStep.List_varMin.Add(Convert.ToString(min));
+                                }
+                                else
+                                {
+                                    Console.WriteLine("[CreatingVarAndComm()] We have issue whit the connection to PLC...");
+                                }
+                            }
+                        }
+                        dataToHedesrForSpecificStepAll.Add(dataToHedesrForSpecificStep);
+                    }
+                    
+                }else{
+                    Console.WriteLine("The item Var is empty !!!");
+                    dataToHedesrForSpecificStepAll.Add(new HeaderTable());
+                    return dataToHedesrForSpecificStepAll;
+                }
+
+                // Commponents for Step (#)     
+                if(itemStep.ListOfComponetsAllSteps.Count !=0)
+                {
+                    // Creating list for Name/serial Component
+                    for(int i = 0; i < itemStep.ListOfComponetsAllSteps.Count; i++) 
+                    {
+
+                        dataToHedesrForSpecificStepAll[i].List_nameComponent.AddRange(itemStep.ListOfComponetsAllSteps[i].ComponentDesc);
+
+                        var DB_TRCDatablock = itemStep.ListOfComponetsAllSteps[i].TRCDatablock;               // DB for value refer serial
+                        var Byte_TRCStartAddress = itemStep.ListOfComponetsAllSteps[i].TRCStartAddress;       // Byte for value refer serial 
+                        var amount_TRCLength = itemStep.ListOfComponetsAllSteps[i].TRCLenght;                 // Amount for value refer serial
+
+                        Console.WriteLine($"Debug information {i + 1} <<<<<<<< COMPONENT >>>>>>>");
+                        Console.WriteLine($"DB_TRCDatablock: " + string.Join("| ", DB_TRCDatablock));
+                        Console.WriteLine("Byte_TRCStartAddress: " + string.Join("| ", Byte_TRCStartAddress));
+                        Console.WriteLine("amount_TRCLength: " + string.Join("| ", amount_TRCLength));
+
+                        if((DB_TRCDatablock.Count > 0) && (Byte_TRCStartAddress.Count > 0) && (amount_TRCLength.Count > 0))
+                        {
+                            for(int x = 0;  x < DB_TRCDatablock.Count; x++)
+                            {
+                                int DB_TRC = int.Parse(DB_TRCDatablock[x]);
+                                int Byte_TRC = int.Parse(Byte_TRCStartAddress[x]);
+                                int len_TRC = int.Parse(amount_TRCLength[x]);
+
+                                if(mS7con.connectPLc())
+                                {
+                                    var serial = mS7con.ReadString(DB_TRC, Byte_TRC, len_TRC);  // string
+                                    
+                                    Console.WriteLine($"DB:{DB_TRC} Byte: {Byte_TRC} Len: {len_TRC}");
+
+                                    dataToHedesrForSpecificStepAll[i].List_components.Add(serial);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("[CreatingVarAndComm()] We have issue whit the connection to PLC...");
+                                }
+                            }
+                        }
+                        // In this field We not return and add because everything is done in the above code  rows:[1683] & [1708]
+                    }
+
+                }
+                else{
+                    Console.WriteLine("The item Commponents are empty");
+                    dataToHedesrForSpecificStepAll.Add(new HeaderTable());
+                    return dataToHedesrForSpecificStepAll;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error, during prepare a data [dataToArchive()] : {ex.Message}");
+            }
+            return dataToHedesrForSpecificStepAll;
+        }
+        private void StoredDataInToSqlTable (List<HeaderTable> dataArchive)                                                             // This function writes the data to sql database
+        {
+
+        }
+        
 
         #endregion
 

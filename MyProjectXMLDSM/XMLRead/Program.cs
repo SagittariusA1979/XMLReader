@@ -223,9 +223,6 @@ namespace DSMTester
                 var status_trc = myOpCycle.TRC_thread();
                 //Console.WriteLine($"STATUS_TRC :{status_trc}");
 
-                // Make a tables for TRC
-                //myOpCycle.MakeHeaderArchive_p();  --- > TO BE REMOVED !!!
-
                 // reading test from sqldb
                 //controlsOp770.csCValidFromSQL();
 
