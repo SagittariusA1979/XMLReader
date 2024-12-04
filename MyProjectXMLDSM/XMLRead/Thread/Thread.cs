@@ -22,6 +22,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Dynamic;
 using System.Threading;
+using System.Text;
 using Archive;
 
 using readxmlFile;
@@ -704,7 +705,9 @@ namespace CSC
                 
                 
                 MakeTableAndHeaderArchiveTable(nameOp, "OP", resultHeaderForArchivtable);                     // This place i check (if exist or not, table in SQL database) and creating it if not exist
-                //StoredDataInToSqlTable(resultVarandCommForArchivetable);
+
+                AddDataToArchiveTable("OP700", resultVarandCommForArchivetable, resultHeaderForArchivtable);
+               
 
                 // ---
 
@@ -1731,11 +1734,224 @@ namespace CSC
             }
             return dataToHedesrForSpecificStepAll;
         }
-        private void StoredDataInToSqlTable (List<HeaderTable> dataArchive)                                                             // This function writes the data to sql database
+
+        //----
+        // private void AddDataToArchiveTable(string tableName, List<HeaderTable> dataToStoreInDatabase, HeaderTable columnName)
+        // {
+        //     try
+        //     {
+        //         // Check database connection
+        //         var (isConnected, errorMessage) = mArchiveDB.CheckDatabaseConnection_nextGen();
+
+        //         if (!isConnected)
+        //         {
+        //             Console.WriteLine($"Failed to connect to the database. Error: {errorMessage}");
+        //             return;
+        //         }
+
+        //         foreach (var dataToArchive in dataToStoreInDatabase)
+        //         {
+        //             // SQL Insert Command Construction
+        //             var insertDataQuery = new StringBuilder();
+        //             insertDataQuery.AppendLine($"INSERT INTO {tableName} (");
+
+        //             // Adding the column names from HeaderTable (in a specific order)
+        //             var columnNames = new List<string>();
+        //             columnNames.Add("OP");
+        //             columnNames.AddRange(columnName.List_nameSteps);
+        //             columnNames.AddRange(columnName.List_statusSteps);
+        //             columnNames.AddRange(columnName.List_nameVariables);
+        //             columnNames.AddRange(columnName.List_variables);
+        //             columnNames.AddRange(columnName.List_varMin);
+        //             columnNames.AddRange(columnName.List_varMax);
+        //             columnNames.AddRange(columnName.List_nameComponent);
+        //             columnNames.AddRange(columnName.List_components);
+        //             columnNames.Add("DateAndTime");
+
+        //             insertDataQuery.AppendLine(string.Join(", ", columnNames));
+        //             insertDataQuery.AppendLine(") VALUES (");
+
+        //             // Adding the values for each of the corresponding columns
+        //             var values = new List<string>();
+        //             values.Add("'Checked'"); // Assuming "OP" column value is constant
+
+        //             // Match values from dataToArchive to columns, ensuring correct alignment
+        //             int variableIndex = 0;
+        //             foreach (var step in columnName.List_nameSteps)
+        //             {
+        //                 values.Add(dataToArchive.List_nameSteps.Count > variableIndex ? $"'{dataToArchive.List_nameSteps[variableIndex]}'" : "NULL");
+        //                 variableIndex++;
+        //             }
+
+        //             variableIndex = 0;
+        //             foreach (var status in columnName.List_statusSteps)
+        //             {
+        //                 values.Add(dataToArchive.List_statusSteps.Count > variableIndex ? $"'{dataToArchive.List_statusSteps[variableIndex]}'" : "NULL");
+        //                 variableIndex++;
+        //             }
+
+        //             variableIndex = 0;
+        //             foreach (var variableName in columnName.List_nameVariables)
+        //             {
+        //                 if (variableIndex < dataToArchive.List_nameVariables.Count)
+        //                 {
+        //                     values.Add($"'{dataToArchive.List_nameVariables[variableIndex]}'");
+        //                     values.Add($"'{dataToArchive.List_variables[variableIndex]}'");
+        //                     values.Add($"'{dataToArchive.List_varMin[variableIndex]}'");
+        //                     values.Add($"'{dataToArchive.List_varMax[variableIndex]}'");
+        //                 }
+        //                 else
+        //                 {
+        //                     values.Add("NULL");
+        //                     values.Add("NULL");
+        //                     values.Add("NULL");
+        //                     values.Add("NULL");
+        //                 }
+        //                 variableIndex++;
+        //             }
+
+        //             variableIndex = 0;
+        //             foreach (var componentName in columnName.List_nameComponent)
+        //             {
+        //                 if (variableIndex < dataToArchive.List_nameComponent.Count)
+        //                 {
+        //                     values.Add($"'{dataToArchive.List_nameComponent[variableIndex]}'");
+        //                     values.Add($"'{dataToArchive.List_components[variableIndex]}'");
+        //                 }
+        //                 else
+        //                 {
+        //                     values.Add("NULL");
+        //                     values.Add("NULL");
+        //                 }
+        //                 variableIndex++;
+        //             }
+
+        //             values.Add($"'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'");
+
+        //             insertDataQuery.AppendLine(string.Join(", ", values));
+        //             insertDataQuery.AppendLine(");");
+
+        //             // Execute the SQL Insert command
+        //             mArchiveDB.Database.ExecuteSqlRaw(insertDataQuery.ToString());
+        //         }
+        //         Console.WriteLine("Data added to archive table successfully.");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine($"Error adding data to archive table: {ex.Message}");
+        //     }
+        // }
+
+        private void AddDataToArchiveTable(string tableName, List<HeaderTable> dataToStoreInDatabase, HeaderTable columnName)
         {
 
+            // Usage Example:
+            // var columnName = new HeaderTable
+            // {
+            //     List_nameSteps = new List<string> { "Step1", "Step2", "Step3", "Step4", "Step5", "Step6", "Step7" },
+            //     List_statusSteps = new List<string> { "Status1", "Status2", "Status3", "Status4", "Status5", "Status6", "Status7" },
+            //     List_nameVariables = new List<string> { "S1_VariablesName1", "S1_VariablesName2", "S2_VariablesName1", "S3_VariablesName1", "S4_VariablesName1", "S5_VariablesName1", "S6_VariablesName1", "S7_VariablesName1" },
+            //     List_variables = new List<string> { "S1_Value1", "S1_Value2", "S2_Value1", "S3_Value1", "S4_Value1", "S5_Value1", "S6_Value1", "S7_Value1" },
+            //     List_varMin = new List<string> { "S1_ValMin1", "S1_ValMin2", "S2_ValMin1", "S3_ValMin1", "S4_ValMin1", "S5_ValMin1", "S6_ValMin1", "S7_ValMin1" },
+            //     List_varMax = new List<string> { "S1_ValMax_1", "S1_ValMax_2", "S2_ValMax_1", "S3_ValMax_1", "S4_ValMax_1", "S5_ValMax_1", "S6_ValMax_1", "S7_ValMax_1" },
+            //     List_nameComponent = new List<string> { "S6_ComponentsName1", "S7_ComponentsName1" },
+            //     List_components = new List<string> { "S6_ComponentsCode1", "S7_ComponentsCode1" }
+            // };
+            // var dataToStoreInDatabase = new List<HeaderTable>
+            // {
+            //     new HeaderTable
+            //     {
+            //         List_nameSteps = new List<string> { "Step1" },
+            //         List_statusSteps = new List<string> { "Completed", "Pending" },
+            //         List_nameVariables = new List<string> { "S1_VariablesName1", "S1_VariablesName2" },
+            //         List_variables = new List<string> { "Val1", "Val2" },
+            //         List_varMin = new List<string> { "S1_ValMin1", "S1_ValMin2" },
+            //         List_varMax = new List<string> { "S1_ValMax_1", "S1_ValMax_2" },
+            //         List_nameComponent = new List<string> {},
+            //         List_components = new List<string> {}
+            //     }
+            // };
+
+            try
+            {
+                // Check database connection
+                var (isConnected, errorMessage) = mArchiveDB.CheckDatabaseConnection_nextGen();
+
+                if (!isConnected)
+                {
+                    Console.WriteLine($"Failed to connect to the database. Error: {errorMessage}");
+                    return;
+                }
+
+                // SQL Insert Command Construction
+                var insertDataQuery = new StringBuilder();
+                insertDataQuery.AppendLine($"INSERT INTO {tableName} (");
+
+                // Adding the column names from HeaderTable (in a specific order)
+                var columnNames = new List<string>();
+                columnNames.Add("OP");
+                columnNames.AddRange(columnName.List_nameSteps);
+                columnNames.AddRange(columnName.List_statusSteps);
+                columnNames.AddRange(columnName.List_nameVariables);
+                columnNames.AddRange(columnName.List_variables);
+                columnNames.AddRange(columnName.List_varMin);
+                columnNames.AddRange(columnName.List_varMax);
+                columnNames.AddRange(columnName.List_nameComponent);
+                columnNames.AddRange(columnName.List_components);
+                columnNames.Add("DateAndTime");
+
+                insertDataQuery.AppendLine(string.Join(", ", columnNames));
+                insertDataQuery.AppendLine(") VALUES (");
+
+                // Adding the values for each of the corresponding columns
+                var values = new List<string>();
+                values.Add("'Checked'"); // Assuming "OP" column value is constant
+
+                // Extract and add values from dataToStoreInDatabase for each column
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_nameSteps));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_statusSteps));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_nameVariables));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_variables));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_varMin));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_varMax));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_nameComponent));
+                values.AddRange(ExtractValues(dataToStoreInDatabase, d => d.List_components));
+
+                // Adding DateAndTime
+                values.Add($"'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'");
+
+                insertDataQuery.AppendLine(string.Join(", ", values));
+                insertDataQuery.AppendLine(");");
+
+                // Execute the SQL Insert command
+                mArchiveDB.Database.ExecuteSqlRaw(insertDataQuery.ToString());
+
+                Console.WriteLine("Data added to archive table successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding data to archive table: {ex.Message}");
+            }
         }
-        
+
+        private List<string> ExtractValues(List<HeaderTable> dataToStoreInDatabase, Func<HeaderTable, List<string>> selector)       // Helper function to extract values from a list of HeaderTable objects
+        {
+            var values = new List<string>();
+
+            foreach (var data in dataToStoreInDatabase)
+            {
+                var selectedList = selector(data);
+                foreach (var value in selectedList)
+                {
+                    values.Add(!string.IsNullOrEmpty(value) ? $"'{value}'" : "NULL");
+                }
+            }
+
+            return values;
+        }
+    
+
+        //----
 
         #endregion
 

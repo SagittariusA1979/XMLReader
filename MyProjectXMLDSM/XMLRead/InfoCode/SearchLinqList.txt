@@ -270,3 +270,115 @@ net8.0-windows10.0.19041
    - Once the data is in a list, you can easily query it using LINQ. The example shows how to get all step names and variable names and print them.
 
 This approach enables you to parse the nested XML data, store it in collections, and perform LINQ queries on it efficiently. Adjust the properties and mapping logic as needed based on the full structure of your XML data.
+
+
+</ EXAMPLES>
+  private void AddDataToArchiveTable(string tableName, List<HeaderTable> dataToStoreInDatabase, HeaderTable columnName)
+        {
+            try
+            {
+                // Check database connection
+                var (isConnected, errorMessage) = mArchiveDB.CheckDatabaseConnection_nextGen();
+
+                if (!isConnected)
+                {
+                    Console.WriteLine($"Failed to connect to the database. Error: {errorMessage}");
+                    return;
+                }
+
+                foreach (var dataToArchive in dataToStoreInDatabase)
+                {
+                    // SQL Insert Command Construction
+                    var insertDataQuery = new StringBuilder();
+                    insertDataQuery.AppendLine($"INSERT INTO {tableName} (");
+
+                    // Adding the column names from HeaderTable (in a specific order)
+                    var columnNames = new List<string>();
+                    columnNames.Add("OP");                                          // 1
+                    columnNames.AddRange(columnName.List_nameSteps);                // 2
+                    columnNames.AddRange(columnName.List_statusSteps);              // 3
+                    columnNames.AddRange(columnName.List_nameVariables);            // 4
+                    columnNames.AddRange(columnName.List_variables);                // 5
+                    columnNames.AddRange(columnName.List_varMin);                   // 6
+                    columnNames.AddRange(columnName.List_varMax);                   // 7
+                    columnNames.AddRange(columnName.List_nameComponent);            // 8
+                    columnNames.AddRange(columnName.List_components);               // 9
+                    columnNames.Add("DateAndTime");                                 // 10
+
+                    insertDataQuery.AppendLine(string.Join(", ", columnNames));
+                    insertDataQuery.AppendLine(") VALUES (");
+
+                    // Adding the values for each of the corresponding columns
+                    var values = new List<string>();
+                    values.Add("'Checked'"); // Assuming "OP" column value is constant          // 1
+                    values.AddRange(dataToArchive.List_nameSteps.Select(v => $"'{v}'"));        // 2
+                    values.AddRange(dataToArchive.List_statusSteps.Select(v => $"'{v}'"));      // 3
+                    values.AddRange(dataToArchive.List_nameVariables.Select(v => $"'{v}'"));    // 4
+                    values.AddRange(dataToArchive.List_variables.Select(v => $"'{v}'"));        // 5
+                    values.AddRange(dataToArchive.List_varMin.Select(v => $"'{v}'"));           // 6
+                    values.AddRange(dataToArchive.List_varMax.Select(v => $"'{v}'"));           // 7
+                    values.AddRange(dataToArchive.List_nameComponent.Select(v => $"'{v}'"));    // 8
+                    values.AddRange(dataToArchive.List_components.Select(c => $"'{c}'"));       // 9
+                    values.Add($"'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'");            // 10
+
+                    insertDataQuery.AppendLine(string.Join(", ", values));
+                    insertDataQuery.AppendLine(");");
+
+                    // Execute the SQL Insert command
+                    mArchiveDB.Database.ExecuteSqlRaw(insertDataQuery.ToString());
+                }
+                Console.WriteLine("Data added to archive table successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding data to archive table: {ex.Message}");
+            }
+        }
+
+
+        INSERT INTO MyDynamicTable (
+    OP, Step1, Step2, Step3, Step4, Step5, Step6, Step7, 
+    Status1, Status2, Status3, Status4, Status5, Status6, Status7, 
+    S1_VariablesName1, S1_VariablesName2, S2_VariablesName1, S3_VariablesName1, S4_VariablesName1, S5_VariablesName1, S6_VariablesName1, S7_VariablesName1, 
+    S1_ValMin1, S1_ValMin2, S2_ValMin1, S3_ValMin1, S4_ValMin1, S5_ValMin1, S6_ValMin1, S7_ValMin1, 
+    S1_ValMax_1, S1_ValMax_2, S2_ValMax_1, S3_ValMax_1, S4_ValMax_1, S5_ValMax_1, S6_ValMax_1, S7_ValMax_1, 
+    S6_ComponentsName1, S7_ComponentsName1, 
+    S6_ComponentsCode1, S7_ComponentsCode1, 
+    DateAndTime
+) VALUES (
+    'Checked', 
+    'Step1', 
+    'Completed', 'Pending', 
+    'S1_VariablesName1', 'S1_VariablesName2', 
+    'Val1', 'Val2', 
+    'S1_ValMin1', 'S1_ValMin2', 
+    'S1_ValMax_1', 'S1_ValMax_2', 
+    NULL, NULL, 
+    NULL, NULL, 
+    '2024-12-04 15:30:45'
+);
+
+
+   INSERT INTO MyDynamicTable (
+      OP, Step1, Status1, S1_VariablesName1, S1_Value1, S1_ValMin1, S1_ValMax_1, S1_VariablesName2, S1_Value2, S1_ValMin2, S1_ValMax_2, DateAndTime
+   ) VALUES (
+      'Checked', 
+      'Step1', 
+      'Completed', 'Pending', 
+      'S1_VariablesName1', 'Val1', 'S1_ValMin1', 'S1_ValMax_1', 
+      'S1_VariablesName2', 'Val2', 'S1_ValMin2', 'S1_ValMax_2', 
+      '2024-12-04 15:30:45'
+   );
+
+   INSERT INTO MyDynamicTable (
+    OP, Step2, Status2, S2_VariablesName1, S2_Value1, S2_ValMin1, S2_ValMax_1, DateAndTime
+   ) VALUES (
+      'Checked', 
+      'Step2', 
+      'InProgress', 
+      'S2_VariablesName1', 'Val3', 'S2_ValMin1', 'S2_ValMax_1', 
+      '2024-12-04 15:30:45'
+   );
+
+
+<>
